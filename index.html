@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Raka - Full-Stack Developer × AI Engineer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&family=Permanent+Marker&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div id="custom-cursor" aria-hidden="true">●</div>
+
+  <dialog id="preloader" aria-labelledby="loader-title" aria-describedby="loader-status">
+    <div class="loader-content">
+      <p class="eyebrow">RAKA / DIGITAL EXPERIENCES</p>
+      <h2 id="loader-title">LOADING<br><span class="text-blue">THE SYSTEM.</span></h2>
+      <div class="loader-readout" aria-hidden="true"><span id="loader-percentage">000</span><span>%</span></div>
+      <progress id="loader-progress" max="240" value="0" aria-label="Animation loading progress"></progress>
+      <p id="loader-status" role="status">Preparing 240 frames. A little patience, then motion.</p>
+      <button id="loader-skip" class="text-button" type="button">ENTER NOW <span aria-hidden="true">↗</span></button>
+    </div>
+  </dialog>
+
+  <nav id="navbar" aria-label="Main navigation">
+    <a class="logo" href="#scene-01" data-scroll-target="scene-01" aria-label="Raka — back to the beginning">RAKA</a>
+    <div class="nav-links">
+      <a href="#scene-05" data-scroll-target="scene-05">WORK</a>
+      <a href="#scene-02" data-scroll-target="scene-02">ABOUT</a>
+      <a href="#scene-04" data-scroll-target="scene-04">STACK</a>
+      <a href="#scene-07" data-scroll-target="scene-07">EXPERIENCE</a>
+      <a href="#scene-10" data-scroll-target="scene-10">CONTACT</a>
+    </div>
+    <div id="scroll-progress-container">
+      <div id="scroll-progress"></div>
+    </div>
+  </nav>
+
+  <div id="ui-layer">
+    <!-- SCENE 01: POSTER -->
+    <section id="scene-01" class="scene" tabindex="-1" aria-label="Introduction">
+      <h1 class="poster-title">RAKA</h1>
+      <p class="poster-subtitle">FULL-STACK DEVELOPER × AI ENGINEER</p>
+    </section>
+
+    <!-- SCENE 02: IDENTITY -->
+    <section id="scene-02" class="scene" tabindex="-1" aria-label="About Raka">
+      <div class="identity-text">
+        <div class="line">RAKA</div>
+        <div class="line text-blue">FULL-STACK DEVELOPER</div>
+        <div class="line">AI ENGINEER</div>
+      </div>
+      <p class="identity-sub">I build intelligent digital products, scalable web systems, and interactive experiences.
+      </p>
+    </section>
+
+    <!-- SCENE 03: THE BUILDER -->
+    <section id="scene-03" class="scene">
+      <h2 class="statement">I DON'T JUST WRITE CODE.<br><span class="text-blue">I BUILD SYSTEMS.</span></h2>
+      <div class="architecture-flow">
+        <div class="arch-step">IDEA</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step">DESIGN</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step">FRONTEND</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step">API</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step">BACKEND</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step">DATABASE</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step">AI</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step">DEPLOYMENT</div>
+      </div>
+    </section>
+
+    <!-- SCENE 04: TECHNOLOGY -->
+    <section id="scene-04" class="scene" tabindex="-1" aria-label="Technology stack">
+      <div class="tech-ecosystem">
+        <div class="tech-group pos-1">
+          <h3>FRONTEND</h3>
+          <p>React / TypeScript / JavaScript / Vite / Tailwind CSS</p>
+        </div>
+        <div class="tech-group pos-2">
+          <h3>BACKEND</h3>
+          <p>Node.js / Express.js / NestJS / Spring Boot / FastAPI / Flask</p>
+        </div>
+        <div class="tech-group pos-3">
+          <h3>DATABASE</h3>
+          <p>PostgreSQL / MySQL / MongoDB / Prisma</p>
+        </div>
+        <div class="tech-group pos-4">
+          <h3>AI / ML</h3>
+          <p>Python / YOLOv8 / Computer Vision / Machine Learning / Gemini / LLM APIs</p>
+        </div>
+        <div class="tech-group pos-5">
+          <h3>CLOUD</h3>
+          <p>Git / GitHub / Vercel / Render / Neon</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 05: SELECTED PROJECTS -->
+    <section id="scene-05" class="scene" tabindex="-1" aria-label="Selected work">
+      <h2 class="section-title">SELECTED WORK</h2>
+
+      <div class="project-container" id="project-1">
+        <div class="project-image-wrapper"><img src="./projects/flowsuite.jpg" alt="Flowsuite" class="project-image"
+            loading="lazy" decoding="async"></div>
+        <div class="project-info">
+          <h3>FLOWSUITE</h3>
+          <p class="proj-desc">Multi-tenant SaaS platform.</p>
+          <p class="proj-tech">React / TypeScript / NestJS / Prisma / PostgreSQL / TanStack Query</p>
+          <p class="proj-highlight">Highlight: Multi-tenant architecture, authentication, project management, audit
+            logging, CRM/customer management, APIs and database architecture.</p>
+          <button class="project-open text-button" type="button" aria-haspopup="dialog" aria-controls="project-modal"
+            aria-label="View Flowsuite project details">EXPLORE PROJECT <span aria-hidden="true">↗</span></button>
+        </div>
+      </div>
+
+      <div class="project-container" id="project-2">
+        <div class="project-image-wrapper"><img src="./projects/ai_film.jpg" alt="AI Film" class="project-image"
+            loading="lazy" decoding="async"></div>
+        <div class="project-info">
+          <h3>AI FILM / WATCHROOM</h3>
+          <p class="proj-desc">AI-powered interactive film platform.</p>
+          <p class="proj-highlight">Highlight: AI integration, Interactive storytelling, Gemini, Backend architecture,
+            User experience.</p>
+          <button class="project-open text-button" type="button" aria-haspopup="dialog" aria-controls="project-modal"
+            aria-label="View AI Film / Watchroom project details">EXPLORE PROJECT <span
+              aria-hidden="true">↗</span></button>
+        </div>
+      </div>
+
+      <div class="project-container" id="project-3">
+        <div class="project-image-wrapper"><img src="./projects/traffic.jpg" alt="Intelligent Traffic Management"
+            class="project-image" loading="lazy" decoding="async"></div>
+        <div class="project-info">
+          <h3>INTELLIGENT TRAFFIC MANAGEMENT</h3>
+          <p class="proj-desc">Real-time intelligent traffic signal control using YOLOv8 with ambulance priority.</p>
+          <p class="proj-tech">YOLOv8 / Computer Vision / Python / FastAPI / AI Detection / Risk Scoring</p>
+          <p class="proj-highlight">Highlight: Vehicle detection, ambulance priority, adaptive traffic control, accident
+            detection and automated alerting.</p>
+          <button class="project-open text-button" type="button" aria-haspopup="dialog" aria-controls="project-modal"
+            aria-label="View Intelligent Traffic Management project details">EXPLORE PROJECT <span
+              aria-hidden="true">↗</span></button>
+        </div>
+      </div>
+
+      <div class="project-container" id="project-4">
+        <div class="project-image-wrapper"><img src="./projects/kifayati.jpg" alt="Kifayati" class="project-image"
+            loading="lazy" decoding="async"></div>
+        <div class="project-info">
+          <h3>KIFAYATI</h3>
+          <p class="proj-desc">Smart engineering web system solving complex data flows.</p>
+          <button class="project-open text-button" type="button" aria-haspopup="dialog" aria-controls="project-modal"
+            aria-label="View Kifayati project details">EXPLORE PROJECT <span aria-hidden="true">↗</span></button>
+        </div>
+      </div>
+
+      <div class="project-container" id="project-5">
+        <div class="project-image-wrapper"><img src="./projects/disease.jpg" alt="Multiple Disease Prediction"
+            class="project-image" loading="lazy" decoding="async"></div>
+        <div class="project-info">
+          <h3>MULTIPLE DISEASE PREDICTION</h3>
+          <p class="proj-desc">Machine-learning application demonstrating applied ML and software integration.</p>
+          <button class="project-open text-button" type="button" aria-haspopup="dialog" aria-controls="project-modal"
+            aria-label="View Multiple Disease Prediction project details">EXPLORE PROJECT <span
+              aria-hidden="true">↗</span></button>
+        </div>
+      </div>
+      <div class="project-container" id="project-6">
+        <div class="project-image-wrapper"><img src="./projects/como.jpg"
+            alt="Como drink discovery app with cocktail search and personal bar matching" class="project-image"
+            loading="lazy" decoding="async"></div>
+        <div class="project-info">
+          <h3>COMO</h3>
+          <p class="proj-desc">Cocktail and mocktail discovery, built around what’s in your bar.</p>
+          <p class="proj-tech">Next.js / React / TypeScript / Tailwind CSS</p>
+          <p class="proj-highlight">Highlight: Ingredient-based recipe matching, brand-aware search, personal bar
+            inventory, saved favorites, and detailed recipes in a responsive interface.</p>
+          <button class="project-open text-button" type="button" aria-haspopup="dialog" aria-controls="project-modal"
+            aria-label="View Como project details">EXPLORE PROJECT <span aria-hidden="true">↗</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 06: ENGINEERING -->
+    <section id="scene-06" class="scene">
+      <h2 class="statement">BEHIND THE INTERFACE</h2>
+      <div class="architecture-flow horizontal-flow">
+        <div class="arch-step">USER</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step">REACT / TYPESCRIPT</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step">REST API</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step">BACKEND SERVICES</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step">DATABASE</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step">AI / ML</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step">CLOUD</div>
+      </div>
+    </section>
+
+    <!-- SCENE 07: EXPERIENCE -->
+    <section id="scene-07" class="scene" tabindex="-1" aria-label="Experience">
+      <h2 class="section-title brush-text">EXPERIENCE</h2>
+      <div class="experience-block">
+        <h3>FULL-STACK DEVELOPER INTERN</h3>
+        <h4 class="text-blue">NAVODITA INFOTECH</h4>
+        <ul class="exp-list">
+          <li>Full-stack development</li>
+          <li>Frontend implementation</li>
+          <li>Backend APIs</li>
+          <li>Database integration</li>
+          <li>Web application development</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SCENE 08: ENGINEERING MINDSET -->
+    <section id="scene-08" class="scene">
+      <div class="mindset-container">
+        <h2 class="huge-statement">
+          BUILD.<br>
+          BREAK.<br>
+          UNDERSTAND.<br>
+          REBUILD.
+          <div class="blue-underline"></div>
+        </h2>
+        <p class="mindset-sub">I enjoy taking complex ideas, breaking them into systems, understanding every layer, and
+          turning them into usable products.</p>
+      </div>
+    </section>
+
+    <!-- SCENE 09: CURRENT FOCUS -->
+    <section id="scene-09" class="scene">
+      <h2 class="section-title brush-text">CURRENTLY BUILDING</h2>
+      <div class="focus-list">
+        <div class="focus-item">AI APPLICATIONS</div>
+        <div class="focus-item">FULL-STACK SAAS</div>
+        <div class="focus-item">LLM INTEGRATIONS</div>
+        <div class="focus-item">COMPUTER VISION</div>
+        <div class="focus-item">MODERN WEB ARCHITECTURE</div>
+        <div class="focus-item">INTERACTIVE EXPERIENCES</div>
+      </div>
+    </section>
+
+    <!-- FINAL SCENE: CONTACT -->
+    <section id="scene-10" class="scene" tabindex="-1" aria-label="Contact">
+      <h2 class="statement brush-text text-blue">LET'S BUILD SOMETHING INTERESTING.</h2>
+      <div class="contact-info">
+        <h3>RAKA</h3>
+        <p>Full-Stack Developer × AI Engineer</p>
+        <div class="contact-links">
+          <a href="https://github.com/ravadakaran" class="hover-link">GitHub</a>
+          <a href="www.linkedin.com/in/ravada-karan" class="hover-link">LinkedIn</a>
+          <a href="ravadakaran733@gmail.com" class="hover-link">Email</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <dialog id="project-modal" aria-labelledby="modal-title" aria-describedby="modal-description">
+    <div class="modal-panel">
+      <header class="modal-header">
+        <p class="eyebrow">SELECTED WORK / <span id="modal-number"></span></p>
+        <button id="modal-close" class="text-button" type="button" autofocus aria-label="Close project details">CLOSE
+          <span aria-hidden="true">×</span></button>
+      </header>
+      <div class="modal-layout">
+        <div class="modal-image-wrapper"><img id="modal-image" alt="" decoding="async"></div>
+        <div class="modal-copy">
+          <h2 id="modal-title"></h2>
+          <p id="modal-description"></p>
+          <section id="modal-tech-section" class="modal-detail" hidden>
+            <h3>THE STACK</h3>
+            <p id="modal-tech"></p>
+          </section>
+          <section id="modal-highlight-section" class="modal-detail" hidden>
+            <h3>ENGINEERING HIGHLIGHTS</h3>
+            <p id="modal-highlights"></p>
+          </section>
+          <div class="modal-actions">
+            <a id="modal-live" class="text-button" target="_blank" rel="noopener noreferrer" hidden>LIVE PROJECT <span
+                aria-hidden="true">↗</span></a>
+            <a id="modal-repo" class="text-button" target="_blank" rel="noopener noreferrer" hidden>GITHUB <span
+                aria-hidden="true">↗</span></a>
+            <button id="modal-contact" class="text-button" type="button">LET'S TALK <span
+                aria-hidden="true">↗</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <p id="sequence-status" role="status" hidden></p>
+  <canvas id="scroll-canvas" aria-hidden="true"></canvas>
+  <noscript>
+    <p class="no-script">This scroll-driven portfolio needs JavaScript. Please enable it to explore the work.</p>
+  </noscript>
+
+  <script src="./script.js"></script>
+</body>
+
+</html>
