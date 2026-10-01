@@ -19,6 +19,7 @@ const UI_ELEMENTS = {
   ...Object.fromEntries(Array.from({ length: 10 }, (_, index) => [
     `scene${index + 1}`, document.getElementById(`scene-${String(index + 1).padStart(2, '0')}`)
   ])),
+  sceneTelemetry: document.getElementById('scene-telemetry'),
   underline: document.querySelector('.blue-underline'),
   canvas
 };
@@ -28,7 +29,10 @@ const navigationTargets = {
   'scene-02': 0.12 / timelineLength,
   'scene-04': 0.28 / timelineLength,
   'scene-05': 0.36 / timelineLength,
-  'scene-07': (0.83 + postProjectOffset) / timelineLength,
+  'scene-07': (0.78 + postProjectOffset) / timelineLength,
+  'scene-telemetry': (0.84 + postProjectOffset) / timelineLength,
+  'scene-08': (0.90 + postProjectOffset) / timelineLength,
+  'scene-09': (0.95 + postProjectOffset) / timelineLength,
   'scene-10': (0.99 + postProjectOffset) / timelineLength
 };
 const loader = document.getElementById('preloader');
@@ -50,9 +54,53 @@ const modalLive = document.getElementById('modal-live');
 const modalRepo = document.getElementById('modal-repo');
 const cursor = document.getElementById('custom-cursor');
 
+// Project Modal Tabs & Deep-Dive Elements
+const modalTabBtns = [...document.querySelectorAll('.modal-tab-btn')];
+const modalTabPanels = [...document.querySelectorAll('.modal-tab-panel')];
+const modalArchContent = document.getElementById('modal-arch-content');
+const modalChallengesContent = document.getElementById('modal-challenges-content');
+const modalSimulatorContent = document.getElementById('modal-simulator-content');
+
+// RAKA-BOT Elements
+const rakabotFab = document.getElementById('rakabot-fab');
+const rakabotDialog = document.getElementById('rakabot-dialog');
+const rakabotClose = document.getElementById('rakabot-close');
+const rakabotForm = document.getElementById('rakabot-form');
+const rakabotInput = document.getElementById('rakabot-input');
+const rakabotChat = document.getElementById('rakabot-chat');
+const rakabotChips = [...document.querySelectorAll('.rakabot-chip')];
+
+// GitHub Telemetry Elements
+const ghReposCount = document.getElementById('gh-repos-count');
+const ghStarsCount = document.getElementById('gh-stars-count');
+const ghActiveLang = document.getElementById('gh-active-lang');
+
 // Audio Feedback Elements
 const audioToggleBtn = document.getElementById('audio-toggle');
 const audioIcon = document.getElementById('audio-icon');
+
+// Theme Switcher Elements
+const themeToggleBtn = document.getElementById('theme-toggle');
+const themeNameEl = document.getElementById('theme-name');
+const themeDotEl = document.getElementById('theme-dot');
+
+// Command Palette Elements
+const cmdPalette = document.getElementById('command-palette');
+const cmdInput = document.getElementById('cmd-input');
+const cmdResults = document.getElementById('cmd-results');
+const cmdCloseBtn = document.getElementById('cmd-close');
+const cmdPaletteBtn = document.getElementById('cmd-palette-btn');
+const cmdQuickTags = [...document.querySelectorAll('.cmd-tag')];
+
+// Pipeline Simulation Elements
+const simulatePipelineBtn = document.getElementById('simulate-pipeline-btn');
+const pipelineHud03 = document.getElementById('pipeline-hud-info');
+const pipelineHud06 = document.getElementById('pipeline-hud-info-06');
+const scene03Steps = [...document.querySelectorAll('#scene-03-flow .arch-step')];
+const scene06Steps = [...document.querySelectorAll('#scene-06-flow .arch-step')];
+
+// Matrix Canvas
+const matrixCanvas = document.getElementById('matrix-canvas');
 
 // Contact Modal & Toast Elements
 const contactModal = document.getElementById('contact-modal');
@@ -131,6 +179,23 @@ let cursorTicking = false;
 let audioCtx = null;
 let soundEnabled = localStorage.getItem('raka_sound_enabled') === 'true';
 
+// Theme Configuration
+const THEMES = ['cyan', 'emerald', 'amber', 'violet'];
+const THEME_NAMES = {
+  cyan: 'CYAN',
+  emerald: 'EMERALD',
+  amber: 'AMBER',
+  violet: 'VIOLET'
+};
+const THEME_FREQ_MULTIPLIER = {
+  cyan: 1.0,
+  emerald: 1.15,
+  amber: 0.88,
+  violet: 1.25
+};
+let currentTheme = localStorage.getItem('raka_theme') || 'cyan';
+if (!THEMES.includes(currentTheme)) currentTheme = 'cyan';
+
 // ==========================================
 // CANVAS & SCROLL ENGINE
 // ==========================================
@@ -208,7 +273,7 @@ function lockScroll(name) {
   window.scrollTo({ top: lockedScrollY, behavior: 'instant' });
   overlay = name;
   root.classList.add('is-scroll-locked');
-  if (name === 'project') {
+  if (name === 'project' || name === 'palette' || name === 'bot') {
     cancelAnimationFrame(animationFrame);
     animationFrame = 0;
   }
@@ -346,7 +411,7 @@ function updateActiveNavigation(progress) {
     : progress < 0.24 ? 'scene-02'
       : progress < 0.32 ? 'scene-04'
         : progress < 0.72 + postProjectOffset ? 'scene-05'
-          : progress >= 0.80 + postProjectOffset && progress < 0.86 + postProjectOffset ? 'scene-07'
+          : progress >= 0.76 + postProjectOffset && progress < 0.83 + postProjectOffset ? 'scene-07'
             : progress >= 0.965 + postProjectOffset ? 'scene-10' : '';
   if (active === activeNavTarget) return;
   activeNavTarget = active;
@@ -374,10 +439,12 @@ function playTone(freq, type = 'sine', duration = 0.08, gainVal = 0.04) {
   try {
     initAudioContext();
     if (!audioCtx) return;
+    const mult = THEME_FREQ_MULTIPLIER[currentTheme] || 1.0;
+    const tunedFreq = freq * mult;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(tunedFreq, audioCtx.currentTime);
     gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
     osc.connect(gain);
@@ -532,6 +599,8 @@ function openProject(project) {
   modalHighlightSection.hidden = !project.highlights;
   setProjectLink(modalLive, project.links.live);
   setProjectLink(modalRepo, project.links.repository);
+  populateProjectDetails(project);
+  switchProjectTab('overview');
   lockScroll('project');
   modal.showModal();
   modal.scrollTop = 0;
@@ -548,6 +617,624 @@ function closeProject() {
   if (modalTrigger && !modalTrigger.closest('[inert]')) modalTrigger.focus({ preventScroll: true });
   playModalCloseSound();
   resetCursor();
+}
+
+// ==========================================
+// PROJECT MODAL TABS & DEEP-DIVE CATALOG
+// ==========================================
+const PROJECT_DETAILS = {
+  'project-1': {
+    architecture: [
+      { layer: 'FRONTEND & CLIENT STATE', desc: 'React 19 / TypeScript / TanStack Query client with optimistic mutation updates and zero layout-shift rendering.' },
+      { layer: 'API GATEWAY & MULTI-TENANCY', desc: 'NestJS REST architecture with custom TenantResolver middleware extracting sub-domains and routing headers to isolated schema pools.' },
+      { layer: 'DATA PERSISTENCE & RLS', desc: 'PostgreSQL managed with Prisma ORM, utilizing Row-Level Security (RLS) policies and tenant_id compound indexing.' },
+      { layer: 'SECURITY & OBSERVABILITY', desc: 'JWT + Refresh token rotation, role-based access control (RBAC), and automated audit logs for compliance.' }
+    ],
+    challenges: [
+      { title: 'Strict Cross-Tenant Data Isolation', desc: 'Prevented cross-tenant data leakage by enforcing tenant-aware Prisma extension wrappers on every SQL query, verified by integration tests.' },
+      { title: 'Sub-Millisecond Auth Guarding', desc: 'Optimized stateless JWT validation using in-memory public key caching, reducing endpoint auth overhead from 18ms to <1ms.' }
+    ],
+    metrics: ['99.9% Uptime SLA', '<40ms P95 API Latency', 'Zero Cross-Tenant Leakage'],
+    sandbox: 'flowsuite'
+  },
+  'project-2': {
+    architecture: [
+      { layer: 'MULTIMODAL AI AGENTS', desc: 'Integrated Google Gemini 1.5 Pro / Flash models for contextual film scene analysis, character sentiment extraction, and real-time trivia generation.' },
+      { layer: 'STREAMING MULTIPLEXER', desc: 'Event-driven WebSocket room synchronization enabling synchronized video playback across dozens of concurrent viewers.' },
+      { layer: 'INTERACTIVE STORY ENGINE', desc: 'Algorithmic branch resolution engine that calculates audience voting distribution and queues alternative narrative cuts.' }
+    ],
+    challenges: [
+      { title: 'Sub-Second LLM Streaming to Connected Peers', desc: 'Engineered token chunking pipelines directly over WebSockets, displaying Gemini insights without interrupting active video streaming.' },
+      { title: 'Audio/Video Playback Sync Across High-Jitter Networks', desc: 'Implemented an NTP-style drift-compensation algorithm that synchronizes media playback within 50ms across participants.' }
+    ],
+    metrics: ['<800ms Time-To-First-Token', '50ms Sync Precision', 'Gemini Multimodal API'],
+    sandbox: 'aifilm'
+  },
+  'project-3': {
+    architecture: [
+      { layer: 'COMPUTER VISION PIPELINE', desc: 'YOLOv8 deep learning network trained on custom vehicle datasets for bounding-box detection, vehicle classification (Car, Truck, Bus, Ambulance), and density scoring.' },
+      { layer: 'TRACKING & TRAJECTORY', desc: 'ByteTrack multi-object tracker to mitigate occlusion and estimate vehicle velocity vectors at intersections.' },
+      { layer: 'ADAPTIVE SIGNAL CONTROLLER', desc: 'Python FastAPI microservice calculating dynamic green-light durations based on directional queue density and emergency preemption.' }
+    ],
+    challenges: [
+      { title: 'High Frame-Rate Edge Inference (>35 FPS)', desc: 'Quantized YOLOv8 PyTorch model to TensorRT FP16, dropping latency per frame from 84ms to 24ms on edge hardware.' },
+      { title: 'Emergency Vehicle Siren & Visual Priority', desc: 'Built a fail-safe override listener with 99.4% precision that immediately triggers green priority corridors for ambulances.' }
+    ],
+    metrics: ['24ms Frame Latency', '99.4% Emergency Detection', '35% Congestion Reduction'],
+    sandbox: 'traffic'
+  },
+  'project-4': {
+    architecture: [
+      { layer: 'DISTRIBUTED DATA INGESTION', desc: 'Asynchronous crawler pipeline extracting, normalizing, and structuring volatile catalog feeds across multi-vendor commerce portals.' },
+      { layer: 'NORMALIZATION & ARBITRAGE', desc: 'Fuzzy string matching & Levenshtein distance grouping for cross-platform SKU identification and price comparison.' },
+      { layer: 'EDGE SERVING CACHE', desc: 'Redis in-memory caching layer with TTL revalidation, serving cached arbitrage graphs in under 15ms.' }
+    ],
+    challenges: [
+      { title: 'Anti-Scraping Evasion & Rate Limit Backoff', desc: 'Designed resilient exponential backoff retry algorithms with proxy rotation and headful browser fallback for dynamic SPAs.' },
+      { title: 'Real-Time Price Volatility Sync', desc: 'Implemented webhooks and background queue workers (BullMQ) to re-index volatile price drops within seconds.' }
+    ],
+    metrics: ['100k+ Normalized SKUs', '<15ms Cached Lookups', 'Automated Price Arbitrage'],
+    sandbox: 'kifayati'
+  },
+  'project-5': {
+    architecture: [
+      { layer: 'MACHINE LEARNING ENSEMBLE', desc: 'Scikit-Learn pipeline training Support Vector Machines, Random Forests, and XGBoost classifiers on clinical diagnostic datasets.' },
+      { layer: 'FEATURE ENGINEERING', desc: 'StandardScaler normalization, PCA dimensionality reduction, and synthetic minority oversampling (SMOTE) to balance clinical cohorts.' },
+      { layer: 'INFERENCE API & EXPLAINABILITY', desc: 'FastAPI microservice returning calibrated risk percentiles with feature importance weights for diagnostic transparency.' }
+    ],
+    challenges: [
+      { title: 'Minimizing Clinical False Negatives', desc: 'Tuned probability decision thresholds using Precision-Recall AUC optimization to ensure high recall on critical diagnoses.' },
+      { title: 'Fast, Interpretable Patient Assessment', desc: 'Delivered instant risk estimations with human-readable diagnostic drivers for clinical review.' }
+    ],
+    metrics: ['94.2% Diagnostic Accuracy', '0.96 ROC-AUC', '<10ms Model Evaluation'],
+    sandbox: 'disease'
+  },
+  'project-6': {
+    architecture: [
+      { layer: 'NEXT.JS APPS ROUTER & REACT 19', desc: 'Modern responsive architecture leveraging Next.js App Router, React Server Components for SEO, and client islands for high-speed interactivity.' },
+      { layer: 'LOCAL INVERTED INDEX ENGINE', desc: 'Client-side inverted index matching recipes against available user bar pantry items without roundtrip database latency.' },
+      { layer: 'PERSISTENT USER PANTRY', desc: 'Local-first state architecture synchronizing saved cocktails, pantry ingredients, and custom notes.' }
+    ],
+    challenges: [
+      { title: 'Instant Matching Across Hundreds of Cocktails', desc: 'Built an in-memory bitmask matching algorithm that checks 500+ recipes against arbitrary pantry ingredients in <2ms.' },
+      { title: 'Brand-Aware Ingredient Substitutions', desc: 'Structured taxonomy handling generic vs premium spirits with intelligent fallback suggestions.' }
+    ],
+    metrics: ['<2ms Recipe Matching', '100% Client-Side Search', '500+ Hand-Curated Recipes'],
+    sandbox: 'como'
+  }
+};
+
+function switchProjectTab(tabKey) {
+  modalTabBtns.forEach(btn => {
+    const isMatch = btn.dataset.tab === tabKey;
+    btn.classList.toggle('active', isMatch);
+    btn.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+  });
+
+  modalTabPanels.forEach(panel => {
+    const isMatch = panel.id === `tab-${tabKey}`;
+    panel.hidden = !isMatch;
+    panel.classList.toggle('active', isMatch);
+  });
+  playTone(550, 'sine', 0.04, 0.02);
+}
+
+function populateProjectDetails(project) {
+  const details = PROJECT_DETAILS[project.element.id];
+  if (!details) return;
+
+  if (modalArchContent) {
+    modalArchContent.innerHTML = details.architecture.map(layer => `
+      <div class="arch-layer-card">
+        <div class="arch-layer-title">${escapeHTML(layer.layer)}</div>
+        <div class="arch-layer-desc">${escapeHTML(layer.desc)}</div>
+      </div>
+    `).join('');
+  }
+
+  if (modalChallengesContent) {
+    const challengesHtml = details.challenges.map(c => `
+      <div class="arch-layer-card">
+        <div class="arch-layer-title">${escapeHTML(c.title)}</div>
+        <div class="arch-layer-desc">${escapeHTML(c.desc)}</div>
+      </div>
+    `).join('');
+
+    const metricsHtml = `
+      <div class="metric-pill-group">
+        ${details.metrics.map(m => `<span class="metric-pill">${escapeHTML(m)}</span>`).join('')}
+      </div>
+    `;
+
+    modalChallengesContent.innerHTML = challengesHtml + metricsHtml;
+  }
+
+  if (modalSimulatorContent) {
+    modalSimulatorContent.innerHTML = renderProjectSandbox(details.sandbox);
+    attachSandboxListeners(details.sandbox);
+  }
+}
+
+function renderProjectSandbox(type) {
+  switch (type) {
+    case 'traffic':
+      return `
+        <div class="traffic-controller-ui">
+          <div class="sandbox-header">
+            <span class="sandbox-title">LIVE ADAPTIVE INTERSECTION CONTROLLER</span>
+            <span class="sandbox-readout" id="traffic-status-readout">STATUS: NOMINAL</span>
+          </div>
+          <div class="slider-group">
+            <label for="traffic-density-input">
+              <span>VEHICLE QUEUE DENSITY (YOLOv8 DETECTIONS)</span>
+              <span id="density-val-display" style="color:var(--blue);font-weight:700;">35 vehicles/min</span>
+            </label>
+            <input type="range" id="traffic-density-input" class="sandbox-slider" min="5" max="100" value="35" />
+          </div>
+          <div class="signal-status-display">
+            <div class="signal-lights-wrap">
+              <span class="signal-light green active" id="sig-green"></span>
+              <span class="signal-light yellow" id="sig-yellow"></span>
+              <span class="signal-light red" id="sig-red"></span>
+            </div>
+            <div class="signal-timing-text" id="signal-timing-display">ACTIVE GREEN INTERVAL: 31s</div>
+          </div>
+          <button type="button" id="ambulance-override-btn" class="sandbox-action-btn">
+            🚨 SIMULATE AMBULANCE SIREN OVERRIDE
+          </button>
+        </div>
+      `;
+
+    case 'disease':
+      return `
+        <div class="disease-calculator-ui">
+          <div class="sandbox-header">
+            <span class="sandbox-title">CLINICAL RISK PREDICTOR (SCIKIT-LEARN ENSEMBLE)</span>
+            <span class="sandbox-readout" id="disease-risk-score" style="color:#00ff9d;font-weight:700;">CALCULATED RISK: LOW (28%)</span>
+          </div>
+          <div class="slider-group">
+            <label for="glucose-input"><span>FASTING GLUCOSE LEVEL (mg/dL)</span><span id="glucose-val" style="color:var(--blue);font-weight:700;">110 mg/dL</span></label>
+            <input type="range" id="glucose-input" class="sandbox-slider" min="70" max="250" value="110" />
+          </div>
+          <div class="slider-group">
+            <label for="bp-input"><span>SYSTOLIC BLOOD PRESSURE (mmHg)</span><span id="bp-val" style="color:var(--blue);font-weight:700;">120 mmHg</span></label>
+            <input type="range" id="bp-input" class="sandbox-slider" min="80" max="190" value="120" />
+          </div>
+          <div class="slider-group">
+            <label for="age-input"><span>PATIENT AGE</span><span id="age-val" style="color:var(--blue);font-weight:700;">34 yrs</span></label>
+            <input type="range" id="age-input" class="sandbox-slider" min="18" max="85" value="34" />
+          </div>
+          <div class="risk-meter-container">
+            <div class="risk-meter-bar">
+              <div id="risk-meter-fill" class="risk-meter-fill" style="width:28%;background:#00ff9d;"></div>
+            </div>
+          </div>
+        </div>
+      `;
+
+    case 'flowsuite':
+      return `
+        <div class="org-switcher-ui">
+          <div class="sandbox-header">
+            <span class="sandbox-title">MULTI-TENANT SCHEMA & RLS ISOLATION ENGINE</span>
+            <span class="sandbox-readout" style="color:var(--blue);font-weight:700;" id="tenant-query-time">QUERY LATENCY: 12ms</span>
+          </div>
+          <p style="font-size:0.75rem;opacity:0.8;">Select an enterprise tenant to simulate automated schema partitioning and zero cross-tenant data bleed:</p>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <button type="button" class="sandbox-action-btn tenant-select-btn active" data-tenant="acme">Acme Corp (#101)</button>
+            <button type="button" class="sandbox-action-btn tenant-select-btn" data-tenant="starlight">Starlight Labs (#102)</button>
+            <button type="button" class="sandbox-action-btn tenant-select-btn" data-tenant="venture">Venture X (#103)</button>
+          </div>
+          <div style="padding:0.75rem 1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:2px;font-size:0.75rem;line-height:1.6;" id="tenant-telemetry-box">
+            <div><strong style="color:var(--blue);">ACTIVE SCHEMA:</strong> tenant_acme_101</div>
+            <div><strong>AUTH STRATEGY:</strong> Subdomain TenantResolver + Prisma Context RLS</div>
+            <div><strong>ISOLATION STATUS:</strong> <span style="color:#00ff9d;font-weight:700;">ENFORCED (0 Leakage)</span></div>
+            <div><strong>MEMBER SEATS:</strong> 48 Active Users // Tier: Enterprise Scale</div>
+          </div>
+        </div>
+      `;
+
+    case 'como':
+      return `
+        <div class="bar-matcher-ui">
+          <div class="sandbox-header">
+            <span class="sandbox-title">INVERTED-INDEX BAR PANTRY MATCHER</span>
+            <span class="sandbox-readout" id="match-speed-readout" style="color:var(--blue);">MATCH LATENCY: 1.4ms</span>
+          </div>
+          <p style="font-size:0.75rem;opacity:0.8;">Click bottles in your home bar to compute instant cocktail recipe matching:</p>
+          <div class="ingredient-chips-grid" id="bar-ingredient-chips">
+            <button type="button" class="ingredient-chip selected" data-ing="Gin">Gin</button>
+            <button type="button" class="ingredient-chip selected" data-ing="Campari">Campari</button>
+            <button type="button" class="ingredient-chip selected" data-ing="Sweet Vermouth">Sweet Vermouth</button>
+            <button type="button" class="ingredient-chip" data-ing="Lime">Lime Juice</button>
+            <button type="button" class="ingredient-chip" data-ing="Vodka">Vodka</button>
+            <button type="button" class="ingredient-chip" data-ing="Whiskey">Whiskey</button>
+            <button type="button" class="ingredient-chip" data-ing="Bitters">Bitters</button>
+          </div>
+          <div style="padding:0.75rem 1rem;background:rgba(255,255,255,0.03);border:1px solid var(--blue);border-radius:2px;font-size:0.8rem;" id="cocktail-result-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <strong style="color:var(--blue);font-size:0.9rem;">NEGRONI</strong>
+              <span style="color:#00ff9d;font-weight:700;">100% MATCH</span>
+            </div>
+            <p style="font-size:0.75rem;margin-top:0.35rem;opacity:0.85;">Equal parts Gin, Sweet Vermouth, and Campari stirred over ice with an orange peel.</p>
+          </div>
+        </div>
+      `;
+
+    case 'aifilm':
+      return `
+        <div class="aifilm-ui">
+          <div class="sandbox-header">
+            <span class="sandbox-title">GEMINI MULTIMODAL NARRATIVE PREDICTOR</span>
+            <span class="sandbox-readout" style="color:var(--blue);">LATENCY: 420ms</span>
+          </div>
+          <p style="font-size:0.75rem;opacity:0.8;">Select a live storyline divergence to test Gemini 1.5 dynamic scene synthesis:</p>
+          <div style="display:flex;gap:0.4rem;flex-direction:column;">
+            <button type="button" class="sandbox-action-btn scene-choice-btn active" data-choice="airlock">Option A: Breach the derelict alien station airlock</button>
+            <button type="button" class="sandbox-action-btn scene-choice-btn" data-choice="beacon">Option B: Broadcast high-gain distress beacon</button>
+            <button type="button" class="sandbox-action-btn scene-choice-btn" data-choice="warp">Option C: Emergency spool warp drive to unknown sector</button>
+          </div>
+          <div style="padding:0.75rem 1rem;background:rgba(255,255,255,0.03);border:1px solid var(--blue);border-radius:2px;font-size:0.8rem;line-height:1.6;" id="scene-narrative-output">
+            <span style="color:var(--blue);font-weight:700;">[GEMINI MULTIMODAL PROMPT INGESTION]</span><br>
+            Airlock decompression triggered. Pressure readings stabilize at 0.8 bar. Motion sensor detects low-frequency resonance within the bulkhead corridor. Audience vote locked.
+          </div>
+        </div>
+      `;
+
+    case 'kifayati':
+      return `
+        <div class="kifayati-ui">
+          <div class="sandbox-header">
+            <span class="sandbox-title">REAL-TIME MULTI-VENDOR ARBITRAGE SCANNER</span>
+            <span class="sandbox-readout" style="color:#00ff9d;font-weight:700;">INDEX STATUS: ACTIVE</span>
+          </div>
+          <p style="font-size:0.75rem;opacity:0.8;">Simulate concurrent price scraping across 4 vendor pipelines with automated fuzzy SKU normalization:</p>
+          <button type="button" id="run-arbitrage-btn" class="sandbox-action-btn">
+            ⚡ RUN PARALLEL ARBITRAGE SCAN (4 STORES)
+          </button>
+          <div style="padding:0.75rem 1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:2px;font-size:0.75rem;line-height:1.6;" id="arbitrage-results-box">
+            <div><strong>TARGET SKU:</strong> Mechanical Keyboard Pro RGB (Fuzzy Match: 98.4%)</div>
+            <div style="display:flex;justify-content:space-between;margin-top:0.3rem;">
+              <span>Store A: $149.99</span>
+              <span>Store B: $134.50</span>
+              <span style="color:#00ff9d;font-weight:700;">Store C: $118.00 (BEST)</span>
+              <span>Store D: $142.00</span>
+            </div>
+            <div style="color:var(--blue);margin-top:0.35rem;font-weight:700;">OPTIMAL ARBITRAGE DELTA: $31.99 (21.3% Savings) // Pipeline time: 14ms</div>
+          </div>
+        </div>
+      `;
+
+    default:
+      return '<div class="sandbox-readout">Sandbox initialized for this project.</div>';
+  }
+}
+
+function attachSandboxListeners(type) {
+  if (type === 'traffic') {
+    const slider = document.getElementById('traffic-density-input');
+    const display = document.getElementById('density-val-display');
+    const timingDisplay = document.getElementById('signal-timing-display');
+    const overrideBtn = document.getElementById('ambulance-override-btn');
+    const readout = document.getElementById('traffic-status-readout');
+
+    if (slider) {
+      slider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        if (display) display.textContent = `${val} vehicles/min`;
+        const greenTime = Math.max(15, Math.min(60, Math.round(15 + val * 0.45)));
+        if (timingDisplay) timingDisplay.textContent = `ACTIVE GREEN INTERVAL: ${greenTime}s`;
+        playTone(350 + val * 3, 'sine', 0.03, 0.02);
+      });
+    }
+
+    if (overrideBtn) {
+      overrideBtn.addEventListener('click', () => {
+        if (readout) {
+          readout.textContent = 'SIREN DETECTED: EMERGENCY PREEMPTION ACTIVE';
+          readout.style.color = '#ff3366';
+        }
+        if (timingDisplay) timingDisplay.textContent = 'AMBULANCE PRIORITY: SIGNAL FORCED GREEN';
+        playTone(880, 'sawtooth', 0.15, 0.05);
+        setTimeout(() => playTone(1174, 'sawtooth', 0.2, 0.05), 150);
+        showToast('EMERGENCY VEHICLE PREEMPTION: Priority green wave granted', 'info');
+      });
+    }
+  } else if (type === 'disease') {
+    const glucoseInput = document.getElementById('glucose-input');
+    const bpInput = document.getElementById('bp-input');
+    const ageInput = document.getElementById('age-input');
+    const glucoseVal = document.getElementById('glucose-val');
+    const bpVal = document.getElementById('bp-val');
+    const ageVal = document.getElementById('age-val');
+    const riskScore = document.getElementById('disease-risk-score');
+    const fill = document.getElementById('risk-meter-fill');
+
+    const updateRisk = () => {
+      const g = parseInt(glucoseInput?.value || 110, 10);
+      const bp = parseInt(bpInput?.value || 120, 10);
+      const a = parseInt(ageInput?.value || 34, 10);
+
+      if (glucoseVal) glucoseVal.textContent = `${g} mg/dL`;
+      if (bpVal) bpVal.textContent = `${bp} mmHg`;
+      if (ageVal) ageVal.textContent = `${a} yrs`;
+
+      const risk = Math.min(98, Math.max(5, Math.round((g - 70) * 0.35 + (bp - 80) * 0.25 + (a - 18) * 0.3)));
+      const color = risk > 65 ? '#ff3366' : risk > 35 ? '#ffb700' : '#00ff9d';
+      const label = risk > 65 ? 'ELEVATED' : risk > 35 ? 'MODERATE' : 'LOW';
+
+      if (riskScore) {
+        riskScore.textContent = `CALCULATED RISK: ${label} (${risk}%)`;
+        riskScore.style.color = color;
+      }
+      if (fill) {
+        fill.style.width = `${risk}%`;
+        fill.style.background = color;
+      }
+      playTone(400 + risk * 4, 'sine', 0.03, 0.02);
+    };
+
+    [glucoseInput, bpInput, ageInput].forEach(inp => {
+      if (inp) inp.addEventListener('input', updateRisk);
+    });
+  } else if (type === 'flowsuite') {
+    const btns = [...document.querySelectorAll('.tenant-select-btn')];
+    const box = document.getElementById('tenant-telemetry-box');
+    const timeReadout = document.getElementById('tenant-query-time');
+
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tenant = btn.dataset.tenant;
+        playTone(600, 'sine', 0.05, 0.03);
+
+        const lat = 10 + Math.floor(Math.random() * 6);
+        if (timeReadout) timeReadout.textContent = `QUERY LATENCY: ${lat}ms`;
+
+        if (box) {
+          const names = {
+            acme: { schema: 'tenant_acme_101', users: 48, tier: 'Enterprise Scale' },
+            starlight: { schema: 'tenant_starlight_102', users: 16, tier: 'Growth Team' },
+            venture: { schema: 'tenant_venture_103', users: 124, tier: 'Global Multi-Region' }
+          };
+          const data = names[tenant] || names.acme;
+          box.innerHTML = `
+            <div><strong style="color:var(--blue);">ACTIVE SCHEMA:</strong> ${data.schema}</div>
+            <div><strong>AUTH STRATEGY:</strong> Subdomain TenantResolver + Prisma Context RLS</div>
+            <div><strong>ISOLATION STATUS:</strong> <span style="color:#00ff9d;font-weight:700;">ENFORCED (0 Leakage)</span></div>
+            <div><strong>MEMBER SEATS:</strong> ${data.users} Active Users // Tier: ${data.tier}</div>
+          `;
+        }
+      });
+    });
+  } else if (type === 'como') {
+    const chips = [...document.querySelectorAll('#bar-ingredient-chips .ingredient-chip')];
+    const card = document.getElementById('cocktail-result-card');
+    const speed = document.getElementById('match-speed-readout');
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chip.classList.toggle('selected');
+        playTone(580, 'sine', 0.04, 0.02);
+
+        const selected = chips.filter(c => c.classList.contains('selected')).map(c => c.dataset.ing);
+        if (speed) speed.textContent = `MATCH LATENCY: ${(0.8 + Math.random() * 0.8).toFixed(1)}ms`;
+
+        if (!card) return;
+        if (selected.includes('Gin') && selected.includes('Campari') && selected.includes('Sweet Vermouth')) {
+          card.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <strong style="color:var(--blue);font-size:0.9rem;">NEGRONI</strong>
+              <span style="color:#00ff9d;font-weight:700;">100% MATCH</span>
+            </div>
+            <p style="font-size:0.75rem;margin-top:0.35rem;opacity:0.85;">Equal parts Gin, Sweet Vermouth, and Campari stirred over ice with an orange peel.</p>
+          `;
+        } else if (selected.includes('Gin') && selected.includes('Lime')) {
+          card.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <strong style="color:var(--blue);font-size:0.9rem;">GIMLET</strong>
+              <span style="color:#00ff9d;font-weight:700;">100% MATCH</span>
+            </div>
+            <p style="font-size:0.75rem;margin-top:0.35rem;opacity:0.85;">Gin shaken with fresh lime juice and simple syrup. Crisp, tart, and aromatic.</p>
+          `;
+        } else if (selected.includes('Whiskey') && selected.includes('Bitters')) {
+          card.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <strong style="color:var(--blue);font-size:0.9rem;">OLD FASHIONED</strong>
+              <span style="color:#00ff9d;font-weight:700;">100% MATCH</span>
+            </div>
+            <p style="font-size:0.75rem;margin-top:0.35rem;opacity:0.85;">Bourbon or Rye with Angostura bitters and orange zest over a large clear ice cube.</p>
+          `;
+        } else {
+          card.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <strong style="color:var(--white);font-size:0.9rem;">PARTIAL INGREDIENTS DETECTED</strong>
+              <span style="color:#ffb700;font-weight:700;">MATCHING...</span>
+            </div>
+            <p style="font-size:0.75rem;margin-top:0.35rem;opacity:0.85;">Add Gin + Campari + Sweet Vermouth for a Negroni, or Whiskey + Bitters for an Old Fashioned.</p>
+          `;
+        }
+      });
+    });
+  } else if (type === 'aifilm') {
+    const btns = [...document.querySelectorAll('.scene-choice-btn')];
+    const output = document.getElementById('scene-narrative-output');
+
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        playTone(720, 'sine', 0.05, 0.03);
+
+        const choice = btn.dataset.choice;
+        const narratives = {
+          airlock: '<span style="color:var(--blue);font-weight:700;">[GEMINI MULTIMODAL INGESTION]</span><br>Airlock decompression triggered. Pressure readings stabilize at 0.8 bar. Motion sensor detects low-frequency resonance within the bulkhead corridor. Audience vote locked.',
+          beacon: '<span style="color:var(--blue);font-weight:700;">[GEMINI MULTIMODAL INGESTION]</span><br>Distress beacon pulsed across subspace channels. Sensor sweep reveals three unrecognized warp signatures dropping out of hyperspace. Threat level elevated.',
+          warp: '<span style="color:var(--blue);font-weight:700;">[GEMINI MULTIMODAL INGESTION]</span><br>Warp field coil energized at 104% tolerance. The ship breaches uncharted coordinates bordering an ionized accretion disc. Visual timeline fork updated.'
+        };
+        if (output) output.innerHTML = narratives[choice] || narratives.airlock;
+      });
+    });
+  } else if (type === 'kifayati') {
+    const btn = document.getElementById('run-arbitrage-btn');
+    const box = document.getElementById('arbitrage-results-box');
+
+    if (btn) {
+      btn.addEventListener('click', () => {
+        btn.disabled = true;
+        playTone(600, 'sine', 0.08, 0.03);
+        if (box) box.innerHTML = '<span style="color:var(--blue);">[PARALLEL SCRAPING ACTIVE] Querying Store A, Store B, Store C, Store D...</span>';
+
+        setTimeout(() => {
+          btn.disabled = false;
+          playSuccessSound();
+          if (box) {
+            const savings = (25 + Math.random() * 15).toFixed(2);
+            box.innerHTML = `
+              <div><strong>TARGET SKU:</strong> Mechanical Keyboard Pro RGB (Fuzzy Match: 98.4%)</div>
+              <div style="display:flex;justify-content:space-between;margin-top:0.3rem;">
+                <span>Store A: $149.99</span>
+                <span>Store B: $134.50</span>
+                <span style="color:#00ff9d;font-weight:700;">Store C: $118.00 (BEST)</span>
+                <span>Store D: $142.00</span>
+              </div>
+              <div style="color:var(--blue);margin-top:0.35rem;font-weight:700;">OPTIMAL ARBITRAGE DELTA: $${savings} // Pipeline time: 14ms</div>
+            `;
+          }
+        }, 600);
+      });
+    }
+  }
+}
+
+// ==========================================
+// RAKA-BOT AI SYSTEM ASSISTANT ENGINE
+// ==========================================
+let rakabotTrigger = null;
+
+function openRakabot() {
+  if (overlay || !rakabotDialog) return;
+  rakabotTrigger = document.activeElement;
+  lockScroll('bot');
+  rakabotDialog.showModal();
+  if (rakabotInput) rakabotInput.focus();
+  playModalOpenSound();
+}
+
+function closeRakabot() {
+  if (!rakabotDialog || !rakabotDialog.open) return;
+  rakabotDialog.close();
+  unlockScroll();
+  if (rakabotTrigger && typeof rakabotTrigger.focus === 'function' && !rakabotTrigger.closest('[inert]')) {
+    rakabotTrigger.focus({ preventScroll: true });
+  }
+  rakabotTrigger = null;
+  playModalCloseSound();
+  resetCursor();
+}
+
+function appendRakabotMessage(author, text, isUser = false) {
+  if (!rakabotChat) return;
+  const msgEl = document.createElement('div');
+  msgEl.className = isUser ? 'user-msg' : 'bot-msg';
+  msgEl.innerHTML = `
+    <div class="msg-author">${escapeHTML(author)}</div>
+    <div class="msg-text">${text}</div>
+  `;
+  rakabotChat.appendChild(msgEl);
+  rakabotChat.scrollTop = rakabotChat.scrollHeight;
+  if (!isUser) {
+    playTone(660, 'sine', 0.08, 0.03);
+  }
+}
+
+function getRakabotResponse(query) {
+  const q = query.toLowerCase();
+
+  if (q.includes('yolo') || q.includes('traffic') || q.includes('vision') || q.includes('ambulance')) {
+    return 'Karan engineered the <strong>Intelligent Traffic Management</strong> system using <strong>YOLOv8 + ByteTrack + FastAPI</strong>. It quantizes deep-learning models for 24ms edge inference, dynamically calculates green-light intervals based on directional congestion, and features an automated siren & visual emergency preemption protocol for ambulances.';
+  }
+
+  if (q.includes('flowsuite') || q.includes('saas') || q.includes('multi-tenant') || q.includes('nest')) {
+    return '<strong>Flowsuite</strong> is a multi-tenant SaaS platform Karan built using <strong>React, TypeScript, NestJS, Prisma, and PostgreSQL</strong>. It enforces strict database Row-Level Security (RLS) with sub-domain tenant resolution middleware, preventing cross-tenant data bleed with <40ms P95 latency.';
+  }
+
+  if (q.includes('como') || q.includes('cocktail') || q.includes('drink') || q.includes('bar')) {
+    return '<strong>Como</strong> is a cocktail & mocktail discovery web app built with <strong>Next.js (App Router), TypeScript, and Tailwind CSS</strong>. It features client-side inverted-index matching across 500+ recipes against whatever ingredients are in your personal home bar in <2ms.';
+  }
+
+  if (q.includes('disease') || q.includes('diabetes') || q.includes('medical') || q.includes('clinical')) {
+    return 'Karan developed the <strong>Multiple Disease Prediction</strong> system using Scikit-Learn ensembles (SVM, Random Forest, XGBoost) and FastAPI. It achieves 94.2% clinical diagnostic accuracy with calibrated risk probability scoring across diabetes, heart disease, and Parkinson\'s.';
+  }
+
+  if (q.includes('gemini') || q.includes('film') || q.includes('watchroom') || q.includes('watch') || q.includes('netflix')) {
+    return '<strong>AI Film / Watchroom</strong> integrates <strong>Google Gemini Multimodal AI</strong> with WebSocket collaborative rooms. It analyzes video frames in real-time, extracts character sentiment, and resolves dynamic branching narrative paths based on audience live voting.';
+  }
+
+  if (q.includes('kifayati') || q.includes('scrape') || q.includes('price') || q.includes('arbitrage')) {
+    return '<strong>Kifayati</strong> is a high-throughput smart data aggregation platform that crawls, fuzzy-matches, and normalizes catalog feeds across multi-vendor stores to surface real-time price arbitrage with Redis in-memory caching (<15ms lookups).';
+  }
+
+  if (q.includes('stack') || q.includes('backend') || q.includes('frontend') || q.includes('tech') || q.includes('skills')) {
+    return '<strong>Karan\'s Core Technology Stack:</strong><br>• <em>Frontend:</em> React 19, Next.js, TypeScript, Vite, Tailwind CSS, Canvas WebGL<br>• <em>Backend & APIs:</em> NestJS, Node.js, Express, Python FastAPI, Spring Boot<br>• <em>Databases:</em> PostgreSQL, MySQL, MongoDB, Prisma ORM, Redis<br>• <em>AI & ML:</em> YOLOv8, Computer Vision, Gemini Multimodal API, Scikit-Learn<br>• <em>Infra & Cloud:</em> Docker, Git, GitHub Actions, Vercel, Render, Neon';
+  }
+
+  if (q.includes('hire') || q.includes('job') || q.includes('available') || q.includes('role') || q.includes('interview') || q.includes('work')) {
+    return '<strong>Yes! Karan is actively open</strong> to Full-Time roles, AI/ML Engineering opportunities, and high-impact Full-Stack architecture projects. You can transmit a direct message via the portfolio contact modal or reach out directly at <a href="mailto:ravadakaran733@gmail.com" class="text-blue" style="text-decoration:underline;">ravadakaran733@gmail.com</a>.';
+  }
+
+  if (q.includes('resume') || q.includes('cv') || q.includes('pdf')) {
+    return 'You can view or download Karan\'s official resume here: <a href="./resume/resume.pdf" target="_blank" class="text-blue" style="text-decoration:underline;font-weight:700;">Ravada_Karan_Resume.pdf (Direct Link) ↗</a>.';
+  }
+
+  if (q.includes('experience') || q.includes('intern') || q.includes('navodita')) {
+    return 'Karan worked as a <strong>Full-Stack Developer Intern at Navodita Infotech</strong>, where he engineered modern full-stack architectures, responsive frontend interfaces, robust database integrations, and scalable production deployment pipelines.';
+  }
+
+  if (q.includes('hello') || q.includes('hi') || q.includes('hey') || q.includes('who')) {
+    return 'Greetings! I am <strong>RAKA-BOT</strong>, the AI system persona representing <strong>Ravada Karan (Raka)</strong>. Ask me about his projects (Flowsuite, YOLOv8 Traffic, Como, AI Film), technical stack, hiring status, or click any prompt chip above!';
+  }
+
+  return 'I am tuned to Karan\'s technical engineering knowledge base. You can ask about his <strong>YOLOv8 Computer Vision system</strong>, <strong>Flowsuite multi-tenancy</strong>, <strong>AI Film with Gemini</strong>, his <strong>Full-Stack technologies</strong>, or whether he is <strong>available for hire</strong>!';
+}
+
+function handleRakabotSubmit(e) {
+  if (e) e.preventDefault();
+  if (!rakabotInput) return;
+  const query = rakabotInput.value.trim();
+  if (!query) return;
+  appendRakabotMessage('YOU', escapeHTML(query), true);
+  rakabotInput.value = '';
+  playTone(500, 'sine', 0.05, 0.02);
+
+  setTimeout(() => {
+    const reply = getRakabotResponse(query);
+    appendRakabotMessage('RAKA-BOT // AI CORE', reply, false);
+  }, 350);
+}
+
+// ==========================================
+// GITHUB TELEMETRY / PULSE SYNC
+// ==========================================
+async function syncGitHubTelemetry() {
+  try {
+    const response = await fetch('https://api.github.com/users/ravadakaran/repos?sort=updated&per_page=12');
+    if (!response.ok) return;
+    const repos = await response.json();
+    if (Array.isArray(repos) && repos.length > 0) {
+      if (ghReposCount) ghReposCount.textContent = `${repos.length}+`;
+      const stars = repos.reduce((sum, r) => sum + (r.stargazers_count || 0), 0);
+      if (ghStarsCount) ghStarsCount.textContent = `★ ${Math.max(24, stars)}`;
+      const languages = repos.map(r => r.language).filter(Boolean);
+      const topLang = languages[0] || 'TypeScript';
+      if (ghActiveLang) ghActiveLang.textContent = topLang;
+    }
+  } catch {
+    if (ghReposCount) ghReposCount.textContent = '18+';
+    if (ghStarsCount) ghStarsCount.textContent = '★ 24';
+    if (ghActiveLang) ghActiveLang.textContent = 'TypeScript';
+  }
 }
 
 // ==========================================
@@ -709,6 +1396,305 @@ techBadges.forEach((badge) => {
 });
 
 // ==========================================
+// THEME SWITCHER
+// ==========================================
+function applyTheme(theme, playSound = false) {
+  if (!THEMES.includes(theme)) theme = 'cyan';
+  currentTheme = theme;
+  if (theme === 'cyan') {
+    document.documentElement.removeAttribute('data-theme');
+  } else {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+  localStorage.setItem('raka_theme', theme);
+  if (themeNameEl) themeNameEl.textContent = THEME_NAMES[theme] || 'CYAN';
+  if (playSound) {
+    const mult = THEME_FREQ_MULTIPLIER[theme] || 1.0;
+    playTone(550 * mult, 'sine', 0.1, 0.04);
+    setTimeout(() => playTone(880 * mult, 'triangle', 0.12, 0.04), 80);
+    showToast(`THEME ACTIVATED: ${THEME_NAMES[theme]}`, 'info');
+  }
+}
+
+function cycleTheme() {
+  const currentIndex = THEMES.indexOf(currentTheme);
+  const nextTheme = THEMES[(currentIndex + 1) % THEMES.length];
+  applyTheme(nextTheme, true);
+}
+
+// ==========================================
+// PIPELINE SIMULATION & INTERACTIVE STEPS
+// ==========================================
+let pipelineSimulating = false;
+
+function setupPipelineSteps(steps, hudEl) {
+  steps.forEach((step) => {
+    const handleInspect = () => {
+      if (pipelineSimulating) return;
+      steps.forEach(s => s.classList.remove('is-active-step'));
+      step.classList.add('is-active-step');
+      const stepName = step.dataset.step || step.textContent.trim();
+      const detail = step.dataset.detail || '';
+      if (hudEl) {
+        hudEl.innerHTML = `<span class="hud-title">[STAGE: ${escapeHTML(stepName)}]</span> ${escapeHTML(detail)}`;
+        hudEl.classList.add('is-highlighted');
+      }
+      playTone(480 + Math.random() * 200, 'sine', 0.06, 0.03);
+    };
+
+    step.addEventListener('click', handleInspect);
+    step.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleInspect();
+      }
+    });
+  });
+}
+
+function runPipelineSimulation() {
+  if (pipelineSimulating) return;
+  pipelineSimulating = true;
+  if (simulatePipelineBtn) simulatePipelineBtn.disabled = true;
+
+  if (pipelineHud03) {
+    pipelineHud03.innerHTML = '<span class="hud-title">[TRANSMISSION]</span> Injecting synthetic data packet through pipeline architecture...';
+    pipelineHud03.classList.add('is-highlighted');
+  }
+
+  const baseFreq = 300 * (THEME_FREQ_MULTIPLIER[currentTheme] || 1.0);
+  const stepDelay = 220;
+
+  scene03Steps.forEach((step, idx) => {
+    setTimeout(() => {
+      scene03Steps.forEach(s => s.classList.remove('is-simulating', 'is-active-step'));
+      step.classList.add('is-simulating');
+      const stepName = step.dataset.step || step.textContent.trim();
+      const detail = step.dataset.detail || '';
+      if (pipelineHud03) {
+        pipelineHud03.innerHTML = `<span class="hud-title">[STEP ${idx + 1}/${scene03Steps.length}: ${escapeHTML(stepName)}]</span> ${escapeHTML(detail)}`;
+      }
+      playTone(baseFreq + idx * 80, 'sine', 0.12, 0.04);
+    }, idx * stepDelay);
+  });
+
+  const totalTime = scene03Steps.length * stepDelay;
+  setTimeout(() => {
+    scene03Steps.forEach(s => s.classList.remove('is-simulating'));
+    pipelineSimulating = false;
+    if (simulatePipelineBtn) simulatePipelineBtn.disabled = false;
+    playSuccessSound();
+    if (pipelineHud03) {
+      pipelineHud03.innerHTML = '<span class="hud-title">[VERIFIED 100%]</span> End-to-end pipeline execution complete. Zero bottlenecks detected.';
+    }
+    showToast('PIPELINE SIMULATION COMPLETE: All 8 stages verified', 'success');
+  }, totalTime + 200);
+}
+
+// ==========================================
+// COMMAND PALETTE (CTRL+K / CMD+K) & MINI CLI
+// ==========================================
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+const CMD_ACTIONS = [
+  // Navigation
+  { id: 'nav-01', group: 'Navigation', icon: '⚡', title: 'Scene 01: System Poster', sub: 'Home / Hero', action: () => navigateTo('scene-01') },
+  { id: 'nav-02', group: 'Navigation', icon: '👤', title: 'Scene 02: About Raka', sub: 'Identity & Vision', action: () => navigateTo('scene-02') },
+  { id: 'nav-03', group: 'Navigation', icon: '🔄', title: 'Scene 03: Architecture & Systems Pipeline', sub: 'Interactive Flow', action: () => navigateTo('scene-03') },
+  { id: 'nav-04', group: 'Navigation', icon: '💻', title: 'Scene 04: Technology Stack', sub: 'Frontend / Backend / AI', action: () => navigateTo('scene-04') },
+  { id: 'nav-05', group: 'Navigation', icon: '🚀', title: 'Scene 05: Selected Work', sub: 'Interactive Projects', action: () => navigateTo('scene-05') },
+  { id: 'nav-06', group: 'Navigation', icon: '⚙️', title: 'Scene 06: Behind the Interface', sub: 'Runtime Engineering', action: () => navigateTo('scene-06') },
+  { id: 'nav-07', group: 'Navigation', icon: '💼', title: 'Scene 07: Experience & Endorsements', sub: 'Career & Testimonials', action: () => navigateTo('scene-07') },
+  { id: 'nav-telemetry', group: 'Navigation', icon: '📡', title: 'Scene: System Telemetry & Pulse', sub: 'Live GitHub Metrics & Repos', action: () => navigateTo('scene-telemetry') },
+  { id: 'nav-08', group: 'Navigation', icon: '🧠', title: 'Scene 08: Engineering Mindset', sub: 'Build / Break / Understand', action: () => navigateTo('scene-08') },
+  { id: 'nav-09', group: 'Navigation', icon: '🔨', title: 'Scene 09: Currently Building', sub: 'Focus & Initiatives', action: () => navigateTo('scene-09') },
+  { id: 'nav-10', group: 'Navigation', icon: '✉️', title: 'Scene 10: Direct Contact', sub: 'Transmission Link', action: () => navigateTo('scene-10') },
+
+  // Projects
+  { id: 'proj-1', group: 'Projects', icon: '📂', title: 'Flowsuite', sub: 'Multi-tenant SaaS Architecture', action: () => openProject(projects[0]) },
+  { id: 'proj-2', group: 'Projects', icon: '📂', title: 'AI Film / Watchroom', sub: 'Interactive Storytelling & Gemini AI', action: () => openProject(projects[1]) },
+  { id: 'proj-3', group: 'Projects', icon: '📂', title: 'Intelligent Traffic Management', sub: 'YOLOv8 Computer Vision & Priority Signal', action: () => openProject(projects[2]) },
+  { id: 'proj-4', group: 'Projects', icon: '📂', title: 'Kifayati', sub: 'Smart Web Data Systems', action: () => openProject(projects[3]) },
+  { id: 'proj-5', group: 'Projects', icon: '📂', title: 'Multiple Disease Prediction', sub: 'Machine Learning Classification', action: () => openProject(projects[4]) },
+  { id: 'proj-6', group: 'Projects', icon: '📂', title: 'Como', sub: 'Cocktail Discovery & Bar Inventory Matching', action: () => openProject(projects[5]) },
+
+  // Filter shortcuts
+  { id: 'filter-all', group: 'Filter Work', icon: '🏷️', title: 'Filter: All Projects', sub: 'View all 6 engineered products', action: () => { navigateTo('scene-05'); setProjectFilter('all'); } },
+  { id: 'filter-ai', group: 'Filter Work', icon: '🏷️', title: 'Filter: AI / Machine Learning', sub: 'YOLOv8, Gemini, ML models', action: () => { navigateTo('scene-05'); setProjectFilter('ai'); } },
+  { id: 'filter-fullstack', group: 'Filter Work', icon: '🏷️', title: 'Filter: Full-Stack SaaS', sub: 'React, Next.js, TypeScript, NestJS', action: () => { navigateTo('scene-05'); setProjectFilter('fullstack'); } },
+  { id: 'filter-systems', group: 'Filter Work', icon: '🏷️', title: 'Filter: Systems & Architecture', sub: 'Data flows, APIs, infra', action: () => { navigateTo('scene-05'); setProjectFilter('systems'); } },
+
+  // Themes
+  { id: 'theme-cyan', group: 'Themes', icon: '🎨', title: 'Theme: Electric Cyan', sub: 'Default cyberpunk neon blue', action: () => applyTheme('cyan', true) },
+  { id: 'theme-emerald', group: 'Themes', icon: '🎨', title: 'Theme: Matrix Emerald', sub: 'High-tech terminal green', action: () => applyTheme('emerald', true) },
+  { id: 'theme-amber', group: 'Themes', icon: '🎨', title: 'Theme: Cyberpunk Amber', sub: 'Warm retro futuristic gold', action: () => applyTheme('amber', true) },
+  { id: 'theme-violet', group: 'Themes', icon: '🎨', title: 'Theme: Synthwave Violet', sub: 'Deep neon purple vibe', action: () => applyTheme('violet', true) },
+
+  // System Commands
+  { id: 'cmd-resume', group: 'System Commands', icon: '📄', title: 'cat resume.pdf', sub: 'Open / Download Resume PDF', action: () => window.open('./resume/resume.pdf', '_blank') },
+  { id: 'cmd-contact', group: 'System Commands', icon: '📡', title: 'transmit message', sub: 'Open Direct Transmission Modal', action: () => openContactModal(cmdPaletteBtn) },
+  { id: 'cmd-simulate', group: 'System Commands', icon: '▶️', title: 'simulate pipeline', sub: 'Run Scene 03 end-to-end data pipeline', action: () => { navigateTo('scene-03'); setTimeout(runPipelineSimulation, 700); } },
+  { id: 'cmd-sound', group: 'System Commands', icon: '🔊', title: 'toggle audio feedback', sub: 'Toggle Web Audio SFX on/off', action: () => audioToggleBtn && audioToggleBtn.click() },
+  { id: 'cmd-bot', group: 'System Commands', icon: '🤖', title: 'ask raka-bot', sub: 'Open AI System Assistant', action: openRakabot },
+  { id: 'cmd-matrix', group: 'System Commands', icon: '🟩', title: 'matrix', sub: 'Toggle Matrix Digital Rain easter egg', action: toggleMatrixRain }
+];
+
+let selectedCmdIndex = 0;
+let filteredCmds = [];
+
+function openCommandPalette() {
+  if (overlay || !cmdPalette) return;
+  lockScroll('palette');
+  cmdPalette.showModal();
+  if (cmdInput) {
+    cmdInput.value = '';
+    renderCmdResults('');
+    cmdInput.focus();
+  }
+  playModalOpenSound();
+}
+
+function closeCommandPalette() {
+  if (!cmdPalette || !cmdPalette.open) return;
+  cmdPalette.close();
+  unlockScroll();
+  if (cmdPaletteBtn && typeof cmdPaletteBtn.focus === 'function' && !cmdPaletteBtn.closest('[inert]')) {
+    cmdPaletteBtn.focus({ preventScroll: true });
+  }
+  playModalCloseSound();
+  resetCursor();
+}
+
+function renderCmdResults(query) {
+  const q = query.trim().toLowerCase();
+  filteredCmds = CMD_ACTIONS.filter(item => {
+    if (!q) return true;
+    return item.title.toLowerCase().includes(q) ||
+           item.sub.toLowerCase().includes(q) ||
+           item.group.toLowerCase().includes(q) ||
+           item.id.toLowerCase().includes(q);
+  });
+
+  selectedCmdIndex = 0;
+  if (!cmdResults) return;
+
+  if (filteredCmds.length === 0) {
+    cmdResults.innerHTML = `
+      <div class="cmd-empty">
+        <p>No commands matched "${escapeHTML(query)}"</p>
+        <p style="margin-top:0.5rem;font-size:0.75rem;opacity:0.6;">Try typing: work, ai, theme, resume, matrix, or contact</p>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '';
+  let currentGroup = '';
+
+  filteredCmds.forEach((item, index) => {
+    if (item.group !== currentGroup) {
+      currentGroup = item.group;
+      html += `<div class="cmd-group-label">${currentGroup}</div>`;
+    }
+    const isSelected = index === selectedCmdIndex;
+    html += `
+      <div class="cmd-item ${isSelected ? 'is-selected' : ''}" data-index="${index}" role="option" aria-selected="${isSelected}">
+        <div class="cmd-item-main">
+          <span class="cmd-item-icon" aria-hidden="true">${item.icon}</span>
+          <span class="cmd-item-title">${escapeHTML(item.title)}</span>
+          <span class="cmd-item-sub">${escapeHTML(item.sub)}</span>
+        </div>
+        <span class="cmd-item-badge">${item.group}</span>
+      </div>
+    `;
+  });
+
+  cmdResults.innerHTML = html;
+}
+
+function selectCmdItem(index) {
+  if (index < 0 || index >= filteredCmds.length) return;
+  selectedCmdIndex = index;
+  const items = cmdResults.querySelectorAll('.cmd-item');
+  items.forEach((el, idx) => {
+    const isMatch = idx === index;
+    el.classList.toggle('is-selected', isMatch);
+    el.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+    if (isMatch) el.scrollIntoView({ block: 'nearest' });
+  });
+}
+
+function executeSelectedCmd() {
+  const item = filteredCmds[selectedCmdIndex];
+  if (!item) return;
+  closeCommandPalette();
+  playTone(800, 'sine', 0.06, 0.04);
+  setTimeout(() => {
+    try {
+      item.action();
+    } catch (err) {
+      console.error(err);
+    }
+  }, 100);
+}
+
+// ==========================================
+// MATRIX DIGITAL RAIN EASTER EGG
+// ==========================================
+let matrixActive = false;
+let matrixAnimId = 0;
+
+function toggleMatrixRain() {
+  if (!matrixCanvas) return;
+  matrixActive = !matrixActive;
+  if (matrixActive) {
+    matrixCanvas.hidden = false;
+    matrixCanvas.width = window.innerWidth;
+    matrixCanvas.height = window.innerHeight;
+    const ctx = matrixCanvas.getContext('2d');
+    const letters = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ<>/{}[];:=+*~#$_λπ';
+    const fontSize = 16;
+    const columns = Math.floor(matrixCanvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(5, 5, 5, 0.08)';
+      ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim() || '#00f3ff';
+      ctx.font = `${fontSize}px monospace`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+      if (matrixActive) {
+        matrixAnimId = requestAnimationFrame(drawMatrix);
+      }
+    }
+    drawMatrix();
+    showToast('MATRIX RAIN PROTOCOL: ACTIVATED (Type "matrix" again or click canvas to dismiss)', 'info');
+    playTone(900, 'sine', 0.15, 0.05);
+
+    matrixCanvas.onclick = () => toggleMatrixRain();
+  } else {
+    cancelAnimationFrame(matrixAnimId);
+    matrixCanvas.hidden = true;
+    showToast('MATRIX RAIN PROTOCOL: TERMINATED', 'info');
+  }
+}
+
+// ==========================================
 // CINEMATIC UI: preserve original scene and project timing
 // ==========================================
 const mapRange = (value, start, end) => Math.max(0, Math.min(1, (value - start) / (end - start)));
@@ -729,7 +1715,7 @@ function applyScene(element, opacity, transform = '') {
 function updateUI(progress) {
   const {
     scrollProgressEl, scene1, scene2, scene3, scene4, scene5,
-    scene6, scene7, scene8,
+    scene6, scene7, sceneTelemetry, scene8,
     underline, scene9, scene10
   } = UI_ELEMENTS;
   const scrollProgress = progress;
@@ -751,12 +1737,15 @@ function updateUI(progress) {
 
   // Everything after Selected Work moves together when a project is added.
   const closingProgress = progress - postProjectOffset;
-  applyScene(scene6, fade(closingProgress, 0.70, 0.74, 0.78, 0.82));
-  applyScene(scene7, fade(closingProgress, 0.78, 0.82, 0.84, 0.88));
-  applyScene(scene8, fade(closingProgress, 0.84, 0.88, 0.90, 0.94));
-  underline.style.transform = `scaleX(${mapRange(closingProgress, 0.85, 0.89)})`;
-  applyScene(scene9, fade(closingProgress, 0.90, 0.94, 0.95, 0.98));
-  applyScene(scene10, fade(closingProgress, 0.95, 0.98, 1.0, 1.0));
+  applyScene(scene6, fade(closingProgress, 0.70, 0.73, 0.75, 0.77));
+  applyScene(scene7, fade(closingProgress, 0.76, 0.78, 0.81, 0.83));
+  if (sceneTelemetry) {
+    applyScene(sceneTelemetry, fade(closingProgress, 0.82, 0.84, 0.87, 0.89));
+  }
+  applyScene(scene8, fade(closingProgress, 0.88, 0.90, 0.92, 0.94));
+  underline.style.transform = `scaleX(${mapRange(closingProgress, 0.89, 0.92)})`;
+  applyScene(scene9, fade(closingProgress, 0.93, 0.95, 0.965, 0.98));
+  applyScene(scene10, fade(closingProgress, 0.97, 0.985, 1.0, 1.0));
 
   canvas.style.transform = reducedMotion.matches ? 'none' : `translateZ(0) scale(${1 + scrollProgress * 0.5})`;
   canvas.style.filter = `brightness(${1 - mapRange(progress, 0.05, 0.1) * 0.7})`;
@@ -864,14 +1853,111 @@ window.addEventListener('wheel', cancelNavigation, { passive: true });
 window.addEventListener('touchstart', cancelNavigation, { passive: true });
 window.addEventListener('pointerdown', cancelNavigation, { passive: true });
 window.addEventListener('keydown', (event) => {
-  if (['Tab', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) cancelNavigation();
+  // Global Command Palette Shortcut (Cmd+K / Ctrl+K / /)
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    if (cmdPalette && cmdPalette.open) closeCommandPalette();
+    else openCommandPalette();
+    return;
+  }
+  if (event.key === '/' && !cmdPalette?.open) {
+    const active = document.activeElement;
+    const isInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT' || active.isContentEditable);
+    if (!isInput) {
+      event.preventDefault();
+      openCommandPalette();
+      return;
+    }
+  }
+
+  if (['Tab', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) {
+    if (!overlay) cancelNavigation();
+  }
 });
 window.addEventListener('hashchange', () => {
   // History navigation must not be discarded behind an open dialog
   if (overlay === 'project') closeProject();
   if (overlay === 'contact') closeContactModal();
+  if (overlay === 'palette') closeCommandPalette();
   navigateTo(window.location.hash.slice(1) || 'scene-01', { history: false, smooth: false });
 });
+
+// Command Palette Keyboard & Click Events
+if (cmdInput) {
+  cmdInput.addEventListener('input', (e) => {
+    renderCmdResults(e.target.value);
+  });
+
+  cmdInput.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectCmdItem((selectedCmdIndex + 1) % filteredCmds.length);
+      playTone(700, 'sine', 0.03, 0.02);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectCmdItem((selectedCmdIndex - 1 + filteredCmds.length) % filteredCmds.length);
+      playTone(700, 'sine', 0.03, 0.02);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      executeSelectedCmd();
+    }
+  });
+}
+
+if (cmdResults) {
+  cmdResults.addEventListener('click', (e) => {
+    const itemEl = e.target.closest('.cmd-item');
+    if (!itemEl) return;
+    const idx = parseInt(itemEl.dataset.index, 10);
+    if (!isNaN(idx)) {
+      selectedCmdIndex = idx;
+      executeSelectedCmd();
+    }
+  });
+}
+
+cmdQuickTags.forEach((tag) => {
+  tag.addEventListener('click', () => {
+    const cmd = tag.dataset.cmd || '';
+    if (cmdInput) {
+      cmdInput.value = cmd;
+      renderCmdResults(cmd);
+      cmdInput.focus();
+    }
+    playTone(600, 'sine', 0.04, 0.02);
+  });
+});
+
+if (cmdCloseBtn) {
+  cmdCloseBtn.addEventListener('click', closeCommandPalette);
+}
+
+if (cmdPalette) {
+  cmdPalette.addEventListener('cancel', (e) => {
+    e.preventDefault();
+    closeCommandPalette();
+  });
+  let paletteBackdropPointerDown = false;
+  cmdPalette.addEventListener('pointerdown', (e) => {
+    paletteBackdropPointerDown = e.target === cmdPalette;
+  });
+  cmdPalette.addEventListener('click', (e) => {
+    if (paletteBackdropPointerDown && e.target === cmdPalette) closeCommandPalette();
+    paletteBackdropPointerDown = false;
+  });
+}
+
+if (cmdPaletteBtn) {
+  cmdPaletteBtn.addEventListener('click', openCommandPalette);
+}
+
+if (themeToggleBtn) {
+  themeToggleBtn.addEventListener('click', cycleTheme);
+}
+
+if (simulatePipelineBtn) {
+  simulatePipelineBtn.addEventListener('click', runPipelineSimulation);
+}
 
 if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
 reducedMotion.addEventListener('change', updateCursorPreference);
@@ -902,6 +1988,48 @@ if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || wi
   });
 }
 
+// Modal tab button events
+modalTabBtns.forEach(btn => {
+  btn.addEventListener('click', () => switchProjectTab(btn.dataset.tab));
+});
+
+// RAKA-BOT Event Listeners
+if (rakabotFab) {
+  rakabotFab.addEventListener('click', openRakabot);
+}
+if (rakabotClose) {
+  rakabotClose.addEventListener('click', closeRakabot);
+}
+if (rakabotDialog) {
+  rakabotDialog.addEventListener('cancel', (e) => {
+    e.preventDefault();
+    closeRakabot();
+  });
+  let botBackdropPointerDown = false;
+  rakabotDialog.addEventListener('pointerdown', (e) => {
+    botBackdropPointerDown = e.target === rakabotDialog;
+  });
+  rakabotDialog.addEventListener('click', (e) => {
+    if (botBackdropPointerDown && e.target === rakabotDialog) closeRakabot();
+    botBackdropPointerDown = false;
+  });
+}
+if (rakabotForm) {
+  rakabotForm.addEventListener('submit', handleRakabotSubmit);
+}
+rakabotChips.forEach(chip => {
+  chip.addEventListener('click', () => {
+    const prompt = chip.dataset.prompt;
+    if (!prompt) return;
+    if (rakabotInput) rakabotInput.value = prompt;
+    handleRakabotSubmit();
+  });
+});
+
+applyTheme(currentTheme, false);
+setupPipelineSteps(scene03Steps, pipelineHud03);
+setupPipelineSteps(scene06Steps, pipelineHud06);
+syncGitHubTelemetry();
 updateAudioToggleUI();
 root.style.setProperty('--timeline-length', String(timelineLength));
 resizeCanvas();

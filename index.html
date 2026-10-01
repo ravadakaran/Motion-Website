@@ -64,7 +64,9 @@
       <a href="#scene-04" data-scroll-target="scene-04">STACK</a>
       <a href="#scene-07" data-scroll-target="scene-07">EXPERIENCE</a>
       <a href="#scene-10" data-scroll-target="scene-10">CONTACT</a>
-      <a href="https://github.com/ravadakaran" class="nav-resume-cta" target="_blank" rel="noopener noreferrer" aria-label="View Resume / CV">RESUME <span aria-hidden="true">↗</span></a>
+      <a href="./resume/resume.pdf" class="nav-resume-cta" target="_blank" rel="noopener noreferrer" aria-label="View Resume PDF (opens in new tab)">RESUME <span aria-hidden="true">↗</span></a>
+      <button id="cmd-palette-btn" class="nav-cmd-btn" type="button" aria-label="Open Command Palette (Ctrl+K)" title="Command Palette (Ctrl+K)"><kbd>⌘K</kbd></button>
+      <button id="theme-toggle" class="theme-btn" type="button" aria-label="Cycle theme accent color" title="Cycle Accent Color"><span id="theme-dot" class="theme-dot" aria-hidden="true"></span> <span id="theme-name">CYAN</span></button>
       <button id="audio-toggle" class="audio-btn" type="button" aria-label="Toggle audio effects feedback" title="Toggle audio feedback"><span id="audio-icon" aria-hidden="true">🔇</span> <span class="audio-text">SOUND</span></button>
     </div>
     <div id="scroll-progress-container">
@@ -93,23 +95,29 @@
     <!-- SCENE 03: THE BUILDER -->
     <section id="scene-03" class="scene">
       <h2 class="statement">I DON'T JUST WRITE CODE.<br><span class="text-blue">I BUILD SYSTEMS.</span></h2>
-      <div class="architecture-flow">
-        <div class="arch-step">IDEA</div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-step">DESIGN</div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-step">FRONTEND</div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-step">API</div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-step">BACKEND</div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-step">DATABASE</div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-step">AI</div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-step">DEPLOYMENT</div>
+      <div class="pipeline-controls">
+        <button id="simulate-pipeline-btn" class="pipeline-pulse-btn" type="button" aria-label="Simulate end-to-end data pipeline">
+          <span class="pulse-icon" aria-hidden="true">▶</span> RUN PIPELINE SIMULATION
+        </button>
       </div>
+      <div class="architecture-flow" id="scene-03-flow">
+        <div class="arch-step" tabindex="0" role="button" data-step="IDEA" data-detail="Problem definition, requirement engineering, user journey modeling, and technical scope formulation.">IDEA</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step" tabindex="0" role="button" data-step="DESIGN" data-detail="Component systems, UX wireframing, high-contrast dark cyber interfaces, and state architecture.">DESIGN</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step" tabindex="0" role="button" data-step="FRONTEND" data-detail="React, TypeScript, Next.js, 60fps canvas sequences, Tailwind CSS, and zero-jank DOM rendering.">FRONTEND</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step" tabindex="0" role="button" data-step="API" data-detail="Type-safe REST / tRPC / WebSocket interfaces, schema validation, rate-limiting, and auth guards.">API</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step" tabindex="0" role="button" data-step="BACKEND" data-detail="NestJS, Node.js, FastAPI, Spring Boot microservices, asynchronous workers, and event queues.">BACKEND</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step" tabindex="0" role="button" data-step="DATABASE" data-detail="PostgreSQL, MongoDB, Prisma ORM, Neon serverless, ACID transactions, and indexing.">DATABASE</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step" tabindex="0" role="button" data-step="AI" data-detail="YOLOv8 computer vision, Gemini LLM integrations, risk prediction models, and edge inference.">AI</div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-step" tabindex="0" role="button" data-step="DEPLOYMENT" data-detail="Docker, Vercel, Render, CI/CD pipelines, caching, and automated observability.">DEPLOYMENT</div>
+      </div>
+      <div id="pipeline-hud-info" class="pipeline-hud-info" aria-live="polite">Click any stage or hit "Run Pipeline Simulation" to trace data packet flow</div>
     </section>
 
     <!-- SCENE 04: TECHNOLOGY -->
@@ -265,21 +273,22 @@
     <!-- SCENE 06: ENGINEERING -->
     <section id="scene-06" class="scene">
       <h2 class="statement">BEHIND THE INTERFACE</h2>
-      <div class="architecture-flow horizontal-flow">
-        <div class="arch-step">USER</div>
+      <div class="architecture-flow horizontal-flow" id="scene-06-flow">
+        <div class="arch-step" tabindex="0" role="button" data-step="USER" data-detail="Human interaction layer: clicks, scroll gestures, keyboard shortcuts, and responsive viewports.">USER</div>
         <div class="arch-arrow">↓</div>
-        <div class="arch-step">REACT / TYPESCRIPT</div>
+        <div class="arch-step" tabindex="0" role="button" data-step="REACT / TYPESCRIPT" data-detail="State machines, TanStack query cache, custom hooks, and virtualized visual components.">REACT / TYPESCRIPT</div>
         <div class="arch-arrow">↓</div>
-        <div class="arch-step">REST API</div>
+        <div class="arch-step" tabindex="0" role="button" data-step="REST API" data-detail="End-to-end typed contract, JSON validation, JWT authentication, and SSL termination.">REST API</div>
         <div class="arch-arrow">↓</div>
-        <div class="arch-step">BACKEND SERVICES</div>
+        <div class="arch-step" tabindex="0" role="button" data-step="BACKEND SERVICES" data-detail="Controller-Service-Repository pattern, business logic, tenant isolation, and logging.">BACKEND SERVICES</div>
         <div class="arch-arrow">↓</div>
-        <div class="arch-step">DATABASE</div>
+        <div class="arch-step" tabindex="0" role="button" data-step="DATABASE" data-detail="Relational normalization, connection pooling, prepared statements, and replication.">DATABASE</div>
         <div class="arch-arrow">↓</div>
-        <div class="arch-step">AI / ML</div>
+        <div class="arch-step" tabindex="0" role="button" data-step="AI / ML" data-detail="Pre-trained and fine-tuned models, vector embeddings, image tensors, and low-latency inference.">AI / ML</div>
         <div class="arch-arrow">↓</div>
-        <div class="arch-step">CLOUD</div>
+        <div class="arch-step" tabindex="0" role="button" data-step="CLOUD" data-detail="Edge networks, serverless scaling, global CDN caching, and automated health checks.">CLOUD</div>
       </div>
+      <div id="pipeline-hud-info-06" class="pipeline-hud-info" aria-live="polite">Trace the runtime execution path from human input to cloud infrastructure</div>
     </section>
 
     <!-- SCENE 07: EXPERIENCE & TESTIMONIALS -->
@@ -306,6 +315,116 @@
           <div class="testimonial-card">
             <blockquote class="testimonial-quote">"Uncompromising attention to detail across both AI pipelines and high-framerate interactive user interfaces."</blockquote>
             <p class="testimonial-author text-blue">— Collaborator & Peer</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE TELEMETRY: SYSTEM TELEMETRY & OPEN-SOURCE PULSE -->
+    <section id="scene-telemetry" class="scene" tabindex="-1" aria-label="System Telemetry and Codebase Pulse">
+      <h2 class="section-title brush-text">SYSTEM TELEMETRY</h2>
+      <div class="telemetry-scene-container">
+        <div class="telemetry-hud-card">
+          <div class="telemetry-hud-topbar">
+            <div class="telemetry-source-info">
+              <span class="telemetry-live-dot" aria-hidden="true"></span>
+              <span class="telemetry-sync-status">LIVE GITHUB PULSE // REST API V3</span>
+            </div>
+            <a href="https://github.com/ravadakaran" target="_blank" rel="noopener noreferrer" class="telemetry-profile-badge" title="Visit GitHub profile">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+              <span>@ravadakaran ↗</span>
+            </a>
+          </div>
+
+          <div class="github-stats-grid">
+            <div class="gh-stat-card">
+              <span class="gh-stat-val text-blue" id="gh-repos-count">18+</span>
+              <span class="gh-stat-label">PUBLIC REPOSITORIES</span>
+              <span class="gh-stat-sub">Active open-source codebases</span>
+            </div>
+            <div class="gh-stat-card">
+              <span class="gh-stat-val text-blue" id="gh-stars-count">★ 24</span>
+              <span class="gh-stat-label">TOTAL STARS</span>
+              <span class="gh-stat-sub">Community engagement</span>
+            </div>
+            <div class="gh-stat-card">
+              <span class="gh-stat-val text-blue" id="gh-active-lang">TypeScript</span>
+              <span class="gh-stat-label">PRIMARY LANGUAGE</span>
+              <span class="gh-stat-sub">Core engineering foundation</span>
+            </div>
+            <div class="gh-stat-card">
+              <span class="gh-stat-val text-blue">99.8%</span>
+              <span class="gh-stat-label">WORKFLOW HEALTH</span>
+              <span class="gh-stat-sub">Continuous delivery checks</span>
+            </div>
+          </div>
+
+          <div class="telemetry-repos-section">
+            <div class="telemetry-section-label">PINNED ARCHITECTURES & SYSTEMS</div>
+            <div class="gh-pinned-repos" id="gh-pinned-repos">
+              <a href="https://github.com/ravadakaran/Flow-Suite" target="_blank" rel="noopener noreferrer" class="gh-repo-card">
+                <div class="gh-repo-header">
+                  <span class="gh-repo-name">Flow-Suite</span>
+                  <span class="gh-repo-tag">NestJS / React</span>
+                </div>
+                <p class="gh-repo-summary">Enterprise multi-tenant SaaS workspace platform with RBAC security.</p>
+                <div class="gh-repo-footer">
+                  <span class="gh-repo-lang"><span class="lang-dot lang-ts"></span> TypeScript</span>
+                  <span class="gh-repo-arrow">↗</span>
+                </div>
+              </a>
+              <a href="https://github.com/ravadakaran/Intelligent-traffic-management" target="_blank" rel="noopener noreferrer" class="gh-repo-card">
+                <div class="gh-repo-header">
+                  <span class="gh-repo-name">Intelligent-traffic</span>
+                  <span class="gh-repo-tag">YOLOv8 / Python</span>
+                </div>
+                <p class="gh-repo-summary">Real-time computer vision traffic flow analysis & emergency green wave.</p>
+                <div class="gh-repo-footer">
+                  <span class="gh-repo-lang"><span class="lang-dot lang-py"></span> Python</span>
+                  <span class="gh-repo-arrow">↗</span>
+                </div>
+              </a>
+              <a href="https://github.com/ravadakaran/como" target="_blank" rel="noopener noreferrer" class="gh-repo-card">
+                <div class="gh-repo-header">
+                  <span class="gh-repo-name">como</span>
+                  <span class="gh-repo-tag">Next.js / TS</span>
+                </div>
+                <p class="gh-repo-summary">Cocktail recipe discovery engine with pantry matching & bar inventory.</p>
+                <div class="gh-repo-footer">
+                  <span class="gh-repo-lang"><span class="lang-dot lang-ts"></span> TypeScript</span>
+                  <span class="gh-repo-arrow">↗</span>
+                </div>
+              </a>
+              <a href="https://github.com/ravadakaran/NETFLIX-AI-WATCH-SPACES" target="_blank" rel="noopener noreferrer" class="gh-repo-card">
+                <div class="gh-repo-header">
+                  <span class="gh-repo-name">AI-Watch-Spaces</span>
+                  <span class="gh-repo-tag">Gemini AI</span>
+                </div>
+                <p class="gh-repo-summary">Interactive synchronized streaming room with context-aware Gemini AI.</p>
+                <div class="gh-repo-footer">
+                  <span class="gh-repo-lang"><span class="lang-dot lang-js"></span> JavaScript</span>
+                  <span class="gh-repo-arrow">↗</span>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <div class="telemetry-stack-breakdown">
+            <div class="telemetry-breakdown-header">
+              <span class="breakdown-title">CODE DISTRIBUTION SPECTRUM</span>
+              <span class="breakdown-legend">
+                <span class="legend-item"><span class="legend-dot" style="background:#00f3ff"></span> TypeScript 48%</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#00ff9d"></span> Python 26%</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#f5a623"></span> JavaScript 16%</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#bd00ff"></span> Other 10%</span>
+              </span>
+            </div>
+            <div class="telemetry-bar-track" aria-hidden="true">
+              <div class="telemetry-bar-seg" style="width:48%;background:var(--blue);"></div>
+              <div class="telemetry-bar-seg" style="width:26%;background:#00ff9d;"></div>
+              <div class="telemetry-bar-seg" style="width:16%;background:#f5a623;"></div>
+              <div class="telemetry-bar-seg" style="width:10%;background:#bd00ff;"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -349,6 +468,7 @@
           <button id="open-contact-modal" class="text-button contact-trigger-btn" type="button" aria-haspopup="dialog" aria-controls="contact-modal">TRANSMIT MESSAGE <span aria-hidden="true">✉</span></button>
         </div>
         <div class="contact-links">
+          <a href="./resume/resume.pdf" class="hover-link" target="_blank" rel="noopener noreferrer" download="Ravada_Karan_Resume.pdf">Resume (PDF) <span aria-hidden="true">⬇</span></a>
           <a href="https://github.com/ravadakaran" class="hover-link" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
           <a href="https://www.linkedin.com/in/ravada-karan" class="hover-link" target="_blank" rel="noopener noreferrer">LinkedIn <span aria-hidden="true">↗</span></a>
           <a href="mailto:ravadakaran733@gmail.com" class="hover-link">Email <span>✉</span></a>
@@ -372,22 +492,54 @@
         </div>
         <div class="modal-copy">
           <h2 id="modal-title"></h2>
-          <p id="modal-description"></p>
-          <section id="modal-tech-section" class="modal-detail" hidden>
-            <h3>THE STACK</h3>
-            <p id="modal-tech"></p>
-          </section>
-          <section id="modal-highlight-section" class="modal-detail" hidden>
-            <h3>ENGINEERING HIGHLIGHTS</h3>
-            <p id="modal-highlights"></p>
-          </section>
-          <div class="modal-actions">
-            <a id="modal-live" class="text-button" target="_blank" rel="noopener noreferrer" hidden>LIVE PROJECT <span
-                aria-hidden="true">↗</span></a>
-            <a id="modal-repo" class="text-button" target="_blank" rel="noopener noreferrer" hidden>GITHUB <span
-                aria-hidden="true">↗</span></a>
-            <button id="modal-contact" class="text-button" type="button">LET'S TALK <span
-                aria-hidden="true">↗</span></button>
+          
+          <div class="modal-tab-bar" role="tablist" aria-label="Project details tabs">
+            <button class="modal-tab-btn active" data-tab="overview" type="button" role="tab" aria-selected="true">OVERVIEW</button>
+            <button class="modal-tab-btn" data-tab="architecture" type="button" role="tab" aria-selected="false">ARCHITECTURE</button>
+            <button class="modal-tab-btn" data-tab="challenges" type="button" role="tab" aria-selected="false">CHALLENGES</button>
+            <button class="modal-tab-btn" data-tab="simulator" type="button" role="tab" aria-selected="false">INTERACTIVE SANDBOX</button>
+          </div>
+
+          <!-- TAB 1: OVERVIEW -->
+          <div id="tab-overview" class="modal-tab-panel active" role="tabpanel">
+            <p id="modal-description"></p>
+            <section id="modal-tech-section" class="modal-detail" hidden>
+              <h3>THE STACK</h3>
+              <p id="modal-tech"></p>
+            </section>
+            <section id="modal-highlight-section" class="modal-detail" hidden>
+              <h3>ENGINEERING HIGHLIGHTS</h3>
+              <p id="modal-highlights"></p>
+            </section>
+            <div class="modal-actions">
+              <a id="modal-live" class="text-button" target="_blank" rel="noopener noreferrer" hidden>LIVE PROJECT <span
+                  aria-hidden="true">↗</span></a>
+              <a id="modal-repo" class="text-button" target="_blank" rel="noopener noreferrer" hidden>GITHUB <span
+                  aria-hidden="true">↗</span></a>
+              <button id="modal-contact" class="text-button" type="button">LET'S TALK <span
+                  aria-hidden="true">↗</span></button>
+            </div>
+          </div>
+
+          <!-- TAB 2: ARCHITECTURE -->
+          <div id="tab-architecture" class="modal-tab-panel" role="tabpanel" hidden>
+            <div id="modal-arch-content" class="modal-deep-dive">
+              <!-- Dynamically populated per project -->
+            </div>
+          </div>
+
+          <!-- TAB 3: CHALLENGES & METRICS -->
+          <div id="tab-challenges" class="modal-tab-panel" role="tabpanel" hidden>
+            <div id="modal-challenges-content" class="modal-deep-dive">
+              <!-- Dynamically populated per project -->
+            </div>
+          </div>
+
+          <!-- TAB 4: INTERACTIVE SIMULATOR -->
+          <div id="tab-simulator" class="modal-tab-panel" role="tabpanel" hidden>
+            <div id="modal-simulator-content" class="modal-sandbox">
+              <!-- Dynamic interactive widget per project -->
+            </div>
           </div>
         </div>
       </div>
@@ -447,6 +599,78 @@
           </div>
         </form>
       </div>
+    </div>
+  </dialog>
+
+  <!-- CYBER COMMAND PALETTE MODAL -->
+  <dialog id="command-palette" aria-label="System Command Palette">
+    <div class="cmd-palette-panel">
+      <div class="cmd-input-header">
+        <span class="cmd-prefix" aria-hidden="true">❯</span>
+        <input id="cmd-input" type="text" placeholder="Type a command or search (e.g. work, ai, theme, resume, matrix)..." autocomplete="off" spellcheck="false" />
+        <button id="cmd-close" type="button" class="cmd-close-btn" aria-label="Close command palette">ESC</button>
+      </div>
+      <div class="cmd-quick-tags">
+        <button class="cmd-tag" type="button" data-cmd="work">WORK</button>
+        <button class="cmd-tag" type="button" data-cmd="ai">AI / ML</button>
+        <button class="cmd-tag" type="button" data-cmd="theme">THEME</button>
+        <button class="cmd-tag" type="button" data-cmd="resume">RESUME</button>
+        <button class="cmd-tag" type="button" data-cmd="contact">TRANSMIT</button>
+        <button class="cmd-tag" type="button" data-cmd="matrix">MATRIX</button>
+      </div>
+      <div id="cmd-results" class="cmd-results" role="listbox">
+        <!-- Dynamically rendered result items -->
+      </div>
+      <footer class="cmd-footer">
+        <span><kbd>↑</kbd> <kbd>↓</kbd> Navigate</span>
+        <span><kbd>↵</kbd> Select</span>
+        <span><kbd>ESC</kbd> Close</span>
+        <span class="cmd-sys-status">[STATUS: SYS_ONLINE]</span>
+      </footer>
+    </div>
+  </dialog>
+
+  <!-- MATRIX CANVAS EASTER EGG OVERLAY -->
+  <canvas id="matrix-canvas" class="matrix-canvas" hidden aria-hidden="true"></canvas>
+
+  <!-- RAKA-BOT FLOATING ACTION TRIGGER -->
+  <button id="rakabot-fab" class="rakabot-fab" type="button" aria-haspopup="dialog" aria-controls="rakabot-dialog" aria-label="Open RAKA-BOT AI Assistant">
+    <span class="rakabot-icon" aria-hidden="true">🤖</span>
+    <span class="rakabot-title">ASK RAKA-BOT</span>
+  </button>
+
+  <!-- RAKA-BOT CYBER SYSTEM ASSISTANT DIALOG -->
+  <dialog id="rakabot-dialog" aria-label="RAKA-BOT AI System Assistant">
+    <div class="rakabot-panel">
+      <header class="rakabot-header">
+        <div class="rakabot-title-group">
+          <span class="rakabot-status-dot" aria-hidden="true"></span>
+          <h3>RAKA-BOT <span class="text-blue">// AI CORE v2.4</span></h3>
+        </div>
+        <button id="rakabot-close" class="text-button" type="button" aria-label="Close RAKA-BOT">CLOSE <span aria-hidden="true">×</span></button>
+      </header>
+
+      <div class="rakabot-prompt-chips">
+        <button class="rakabot-chip" type="button" data-prompt="What did Karan build with YOLOv8?">YOLOv8 Project</button>
+        <button class="rakabot-chip" type="button" data-prompt="Tell me about Flowsuite architecture">Flowsuite Architecture</button>
+        <button class="rakabot-chip" type="button" data-prompt="What backend frameworks does he know?">Backend Stack</button>
+        <button class="rakabot-chip" type="button" data-prompt="Is Karan open for full-time or contract roles?">Availability / Hiring</button>
+        <button class="rakabot-chip" type="button" data-prompt="How can I get his resume and contact him?">Resume & Contact</button>
+      </div>
+
+      <div id="rakabot-chat" class="rakabot-chat" role="log" aria-live="polite">
+        <div class="bot-msg">
+          <div class="msg-author">RAKA-BOT // AI CORE</div>
+          <div class="msg-text">System initialized. I am Karan's interactive AI assistant. Ask me anything about his architecture choices, machine learning models, production systems, or hiring availability!</div>
+        </div>
+      </div>
+
+      <form id="rakabot-form" class="rakabot-input-bar">
+        <input id="rakabot-input" type="text" placeholder="Ask a question about Karan's stack, experience, or projects..." autocomplete="off" spellcheck="false" />
+        <button id="rakabot-send" class="rakabot-send-btn" type="submit" aria-label="Send message">
+          <span>SEND</span> <span aria-hidden="true">↗</span>
+        </button>
+      </form>
     </div>
   </dialog>
 
