@@ -40,6 +40,7 @@ const modal = document.getElementById('project-modal');
 const modalTitle = document.getElementById('modal-title');
 const modalDescription = document.getElementById('modal-description');
 const modalImage = document.getElementById('modal-image');
+const modalVideo = document.getElementById('modal-video');
 const modalNumber = document.getElementById('modal-number');
 const modalTechSection = document.getElementById('modal-tech-section');
 const modalTech = document.getElementById('modal-tech');
@@ -49,7 +50,24 @@ const modalLive = document.getElementById('modal-live');
 const modalRepo = document.getElementById('modal-repo');
 const cursor = document.getElementById('custom-cursor');
 
-// Add verified public URLs here when available. Empty links are not rendered.
+// Audio Feedback Elements
+const audioToggleBtn = document.getElementById('audio-toggle');
+const audioIcon = document.getElementById('audio-icon');
+
+// Contact Modal & Toast Elements
+const contactModal = document.getElementById('contact-modal');
+const contactModalClose = document.getElementById('contact-modal-close');
+const openContactModalBtn = document.getElementById('open-contact-modal');
+const contactForm = document.getElementById('contact-form');
+const contactSubmitBtn = document.getElementById('contact-submit-btn');
+const toastContainer = document.getElementById('toast-container');
+
+// Tech Stack & Filter Elements
+const techBadges = [...document.querySelectorAll('.tech-badge')];
+const techHudIndicator = document.getElementById('tech-hud-indicator');
+const filterPills = [...document.querySelectorAll('.filter-pill')];
+
+// Verified public URLs & media
 const PROJECT_LINKS = {
   'project-1': { live: 'https://flow-suite-beige.vercel.app/', repository: 'https://github.com/ravadakaran/Flow-Suite' },
   'project-2': { live: '', repository: 'https://github.com/ravadakaran/NETFLIX-AI-WATCH-SPACES' },
@@ -61,6 +79,17 @@ const PROJECT_LINKS = {
     repository: 'https://github.com/ravadakaran/como'
   }
 };
+
+const PROJECT_VIDEOS = {
+  // Optional video preview URLs (MP4 / WebM)
+  'project-1': '',
+  'project-2': '',
+  'project-3': '',
+  'project-4': '',
+  'project-5': '',
+  'project-6': ''
+};
+
 const projects = projectElements.map((element, index) => ({
   element,
   trigger: element.querySelector('.project-open'),
@@ -71,6 +100,8 @@ const projects = projectElements.map((element, index) => ({
   highlights: (element.querySelector('.proj-highlight')?.textContent || '').replace(/^Highlight:\s*/i, ''),
   image: element.querySelector('img').src,
   imageAlt: element.querySelector('img').alt,
+  video: PROJECT_VIDEOS[element.id] || '',
+  categories: element.dataset.category || '',
   links: PROJECT_LINKS[element.id] || { live: '', repository: '' },
   timing: [0.30, 0.34, 0.38, 0.42].map(position => position + index * PROJECT_STEP)
 }));
@@ -95,6 +126,10 @@ let mouseX = window.innerWidth / 2;
 let mouseY = window.innerHeight / 2;
 let cursorScale = 1;
 let cursorTicking = false;
+
+// Web Audio API Synthesizer State
+let audioCtx = null;
+let soundEnabled = localStorage.getItem('raka_sound_enabled') === 'true';
 
 // ==========================================
 // CANVAS & SCROLL ENGINE
@@ -322,7 +357,140 @@ function updateActiveNavigation(progress) {
 }
 
 // ==========================================
-// PROJECT DETAILS: native modal focus management & Escape handling
+// AUDIO SYNTHESIZER: Web Audio API (Zero dependencies)
+// ==========================================
+function initAudioContext() {
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) audioCtx = new AudioContextClass();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function playTone(freq, type = 'sine', duration = 0.08, gainVal = 0.04) {
+  if (!soundEnabled) return;
+  try {
+    initAudioContext();
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch { /* Audio unavailable or blocked by browser policy */ }
+}
+
+function playNavSound() {
+  playTone(880, 'sine', 0.05, 0.03);
+}
+
+function playModalOpenSound() {
+  if (!soundEnabled) return;
+  try {
+    initAudioContext();
+    if (!audioCtx) return;
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc1.frequency.setValueAtTime(220, audioCtx.currentTime);
+    osc1.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+    osc2.frequency.setValueAtTime(330, audioCtx.currentTime);
+    osc2.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.18);
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc1.start();
+    osc2.start();
+    osc1.stop(audioCtx.currentTime + 0.18);
+    osc2.stop(audioCtx.currentTime + 0.18);
+  } catch {}
+}
+
+function playModalCloseSound() {
+  if (!soundEnabled) return;
+  try {
+    initAudioContext();
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.frequency.setValueAtTime(580, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(180, audioCtx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.12);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.12);
+  } catch {}
+}
+
+function playSuccessSound() {
+  if (!soundEnabled) return;
+  try {
+    initAudioContext();
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.frequency.setValueAtTime(f, now + i * 0.06);
+      gain.gain.setValueAtTime(0.035, now + i * 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.06 + 0.2);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now + i * 0.06);
+      osc.stop(now + i * 0.06 + 0.2);
+    });
+  } catch {}
+}
+
+function playErrorSound() {
+  playTone(220, 'sawtooth', 0.2, 0.05);
+}
+
+function updateAudioToggleUI() {
+  if (!audioToggleBtn || !audioIcon) return;
+  audioToggleBtn.classList.toggle('is-active', soundEnabled);
+  audioIcon.textContent = soundEnabled ? '🔊' : '🔇';
+  audioToggleBtn.title = soundEnabled ? 'Audio Feedback Active (Click to Mute)' : 'Audio Feedback Muted (Click to Enable)';
+  audioToggleBtn.setAttribute('aria-pressed', soundEnabled ? 'true' : 'false');
+}
+
+// ==========================================
+// TOAST NOTIFICATION SYSTEM
+// ==========================================
+function showToast(message, type = 'info') {
+  if (!toastContainer) return;
+  const toast = document.createElement('div');
+  toast.className = `hud-toast ${type}`;
+  toast.innerHTML = `
+    <span>${message}</span>
+    <button class="toast-close" type="button" aria-label="Dismiss notification">×</button>
+  `;
+  toastContainer.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('is-visible'));
+
+  const dismiss = () => {
+    toast.classList.remove('is-visible');
+    toast.classList.add('is-leaving');
+    setTimeout(() => toast.remove(), 320);
+  };
+
+  toast.querySelector('.toast-close').addEventListener('click', dismiss);
+  setTimeout(dismiss, 5000);
+}
+
+// ==========================================
+// PROJECT DETAILS: modal media, focus, and actions
 // ==========================================
 function setProjectLink(element, url) {
   // Do not turn empty, placeholder, or non-web values into clickable links.
@@ -342,8 +510,22 @@ function openProject(project) {
   modalTitle.textContent = project.title;
   modalDescription.textContent = project.description;
   modalNumber.textContent = `${project.number} / ${String(projects.length).padStart(2, '0')}`;
-  modalImage.src = project.image;
-  modalImage.alt = project.imageAlt;
+  
+  if (project.video) {
+    modalVideo.src = project.video;
+    modalVideo.hidden = false;
+    modalImage.hidden = true;
+    modalVideo.play().catch(() => {});
+  } else {
+    modalVideo.pause();
+    modalVideo.removeAttribute('src');
+    modalVideo.load();
+    modalVideo.hidden = true;
+    modalImage.hidden = false;
+    modalImage.src = project.image;
+    modalImage.alt = project.imageAlt;
+  }
+
   modalTech.textContent = project.tech;
   modalTechSection.hidden = !project.tech;
   modalHighlights.textContent = project.highlights;
@@ -353,18 +535,181 @@ function openProject(project) {
   lockScroll('project');
   modal.showModal();
   modal.scrollTop = 0;
+  playModalOpenSound();
 }
 
 function closeProject() {
   if (!modal.open) return;
+  modalVideo.pause();
+  modalVideo.removeAttribute('src');
+  modalVideo.load();
   modal.close();
   unlockScroll();
   if (modalTrigger && !modalTrigger.closest('[inert]')) modalTrigger.focus({ preventScroll: true });
+  playModalCloseSound();
   resetCursor();
 }
 
 // ==========================================
-// CINEMATIC UI: preserve the original scene and project timing
+// CONTACT MODAL & FORM VALIDATION
+// ==========================================
+let contactModalTrigger = null;
+
+function openContactModal(trigger = null) {
+  if (overlay) return;
+  contactModalTrigger = trigger instanceof Element ? trigger : (document.activeElement || null);
+  lockScroll('contact');
+  contactModal.showModal();
+  contactModal.scrollTop = 0;
+  playModalOpenSound();
+}
+
+function closeContactModal() {
+  if (!contactModal.open) return;
+  contactModal.close();
+  unlockScroll();
+  if (contactModalTrigger && typeof contactModalTrigger.focus === 'function' && !contactModalTrigger.closest('[inert]')) {
+    contactModalTrigger.focus({ preventScroll: true });
+  }
+  contactModalTrigger = null;
+  playModalCloseSound();
+  resetCursor();
+}
+
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+if (contactForm) {
+  contactForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const nameInput = document.getElementById('contact-name');
+    const emailInput = document.getElementById('contact-email');
+    const messageInput = document.getElementById('contact-message');
+    const nameError = document.getElementById('name-error');
+    const emailError = document.getElementById('email-error');
+    const messageError = document.getElementById('message-error');
+
+    let isValid = true;
+
+    // Reset previous errors
+    nameError.textContent = '';
+    emailError.textContent = '';
+    messageError.textContent = '';
+    nameInput.classList.remove('is-invalid');
+    emailInput.classList.remove('is-invalid');
+    messageInput.classList.remove('is-invalid');
+
+    if (!nameInput.value.trim()) {
+      nameError.textContent = 'Please provide your identity / name.';
+      nameInput.classList.add('is-invalid');
+      isValid = false;
+    }
+
+    if (!emailInput.value.trim() || !validateEmail(emailInput.value)) {
+      emailError.textContent = 'Please provide a valid return email address.';
+      emailInput.classList.add('is-invalid');
+      isValid = false;
+    }
+
+    if (!messageInput.value.trim() || messageInput.value.trim().length < 5) {
+      messageError.textContent = 'Transmission message is too brief.';
+      messageInput.classList.add('is-invalid');
+      isValid = false;
+    }
+
+    if (!isValid) {
+      playErrorSound();
+      return;
+    }
+
+    // Submit state simulation
+    contactSubmitBtn.disabled = true;
+    contactSubmitBtn.classList.add('is-sending');
+    playTone(440, 'sine', 0.1, 0.03);
+
+    setTimeout(() => {
+      contactSubmitBtn.disabled = false;
+      contactSubmitBtn.classList.remove('is-sending');
+      playSuccessSound();
+      showToast('TRANSMISSION SENT: Thank you for reaching out. I will reply promptly.', 'success');
+      contactForm.reset();
+      setTimeout(closeContactModal, 1200);
+    }, 1100);
+  });
+}
+
+// ==========================================
+// CATEGORY FILTERING & TECH STACK HUD
+// ==========================================
+function setProjectFilter(category) {
+  playTone(660, 'sine', 0.05, 0.03);
+  filterPills.forEach((pill) => {
+    const isMatch = pill.dataset.filter === category;
+    pill.classList.toggle('active', isMatch);
+    pill.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+  });
+
+  projects.forEach(({ element, categories }) => {
+    const isVisible = category === 'all' || (categories && categories.includes(category));
+    element.classList.toggle('is-filtered-out', !isVisible);
+  });
+}
+
+filterPills.forEach((pill) => {
+  pill.addEventListener('click', () => setProjectFilter(pill.dataset.filter));
+});
+
+const TECH_INFO = {
+  'React': 'Component-driven reactive UIs utilized in Flowsuite, AI Film, and Como.',
+  'TypeScript': 'Strict type-safe application architecture across full-stack repositories.',
+  'JavaScript': 'ESNext, Web Audio API, and high-performance Canvas rendering engines.',
+  'Vite': 'Blazing fast ESM dev server and optimized production bundler.',
+  'Tailwind CSS': 'Utility-first styling systems with custom animations and fluid responsive design.',
+  'Node.js': 'Event-driven asynchronous server runtimes for high-concurrency microservices.',
+  'Express.js': 'RESTful API routing and middleware pipelines.',
+  'NestJS': 'Enterprise-grade modular TypeScript backend architecture in Flowsuite.',
+  'Spring Boot': 'Robust Java enterprise services with dependency injection and security.',
+  'FastAPI': 'High-throughput async Python APIs powering AI model inference and traffic systems.',
+  'Flask': 'Lightweight Python web framework for ML diagnostics endpoints.',
+  'PostgreSQL': 'Relational data modeling, indexing, ACID compliance, and query tuning.',
+  'MySQL': 'Structured relational storage engines with high read performance.',
+  'MongoDB': 'Document-based flexible NoSQL schema for rapid prototyping and telemetry.',
+  'Prisma': 'Next-generation ORM for type-safe database queries and migrations.',
+  'Python': 'Primary language for machine learning, computer vision, and data pipelines.',
+  'YOLOv8': 'Real-time object detection architecture driving Intelligent Traffic Management.',
+  'Computer Vision': 'Video stream processing, density estimation, and bounding-box tracking.',
+  'Machine Learning': 'Predictive classification ensembles (SVM, Random Forest, XGBoost).',
+  'Gemini': 'Multimodal AI & LLM integration for conversational and contextual intelligence.',
+  'LLM APIs': 'Prompt engineering, structured output parsing, and tool calling pipelines.',
+  'Git': 'Version control, atomic commit hygiene, and collaborative workflows.',
+  'GitHub': 'Repository hosting, GitHub Actions CI/CD automation, and open source work.',
+  'Vercel': 'Edge deployments, serverless functions, and global CDN delivery.',
+  'Render': 'Cloud application hosting and scalable backend deployments.',
+  'Neon': 'Serverless Postgres with branchable database architecture.'
+};
+
+techBadges.forEach((badge) => {
+  const tech = badge.dataset.tech;
+  const selectBadge = () => {
+    playTone(520, 'sine', 0.04, 0.025);
+    techBadges.forEach((b) => b.classList.remove('is-selected'));
+    badge.classList.add('is-selected');
+    if (techHudIndicator && TECH_INFO[tech]) {
+      techHudIndicator.textContent = `${tech.toUpperCase()}: ${TECH_INFO[tech]}`;
+    }
+  };
+  badge.addEventListener('click', selectBadge);
+  badge.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      selectBadge();
+    }
+  });
+});
+
+// ==========================================
+// CINEMATIC UI: preserve original scene and project timing
 // ==========================================
 const mapRange = (value, start, end) => Math.max(0, Math.min(1, (value - start) / (end - start)));
 function fade(value, start, inEnd, outStart, end) {
@@ -446,33 +791,73 @@ function updateCursorPreference() {
 // ==========================================
 // EVENT WIRING & STARTUP
 // ==========================================
+if (audioToggleBtn) {
+  audioToggleBtn.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem('raka_sound_enabled', String(soundEnabled));
+    updateAudioToggleUI();
+    if (soundEnabled) {
+      playTone(520, 'sine', 0.08, 0.04);
+      showToast('AUDIO FEEDBACK ENABLED', 'info');
+    } else {
+      showToast('AUDIO FEEDBACK MUTED', 'info');
+    }
+  });
+}
+
 navLinks.forEach((link) => link.addEventListener('click', (event) => {
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
   event.preventDefault();
+  playNavSound();
   navigateTo(link.dataset.scrollTarget);
 }));
+
 projects.forEach((project) => project.trigger.addEventListener('click', () => openProject(project)));
 document.getElementById('modal-close').addEventListener('click', closeProject);
 document.getElementById('modal-contact').addEventListener('click', () => {
+  const trigger = modalTrigger;
   closeProject();
-  navigateTo('scene-10');
+  openContactModal(trigger);
 });
+
 modal.addEventListener('cancel', (event) => {
   event.preventDefault();
   closeProject();
 });
-// Only dismiss when both pointer-down and pointer-up happen on the backdrop.
+
 let backdropPointerDown = false;
 modal.addEventListener('pointerdown', (event) => { backdropPointerDown = event.target === modal; });
 modal.addEventListener('click', (event) => {
   if (backdropPointerDown && event.target === modal) closeProject();
   backdropPointerDown = false;
 });
+
+// Contact Modal Events
+if (openContactModalBtn) {
+  openContactModalBtn.addEventListener('click', () => openContactModal(openContactModalBtn));
+}
+if (contactModalClose) {
+  contactModalClose.addEventListener('click', closeContactModal);
+}
+if (contactModal) {
+  contactModal.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    closeContactModal();
+  });
+  let contactBackdropPointerDown = false;
+  contactModal.addEventListener('pointerdown', (event) => { contactBackdropPointerDown = event.target === contactModal; });
+  contactModal.addEventListener('click', (event) => {
+    if (contactBackdropPointerDown && event.target === contactModal) closeContactModal();
+    contactBackdropPointerDown = false;
+  });
+}
+
 document.getElementById('loader-skip').addEventListener('click', dismissLoader);
 loader.addEventListener('cancel', (event) => {
   event.preventDefault();
   dismissLoader();
 });
+
 window.addEventListener('scroll', updateTargetFrame, { passive: true });
 window.addEventListener('resize', resizeCanvas, { passive: true });
 window.addEventListener('wheel', cancelNavigation, { passive: true });
@@ -482,28 +867,42 @@ window.addEventListener('keydown', (event) => {
   if (['Tab', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) cancelNavigation();
 });
 window.addEventListener('hashchange', () => {
-  // History navigation must not be discarded behind an open project dialog.
+  // History navigation must not be discarded behind an open dialog
   if (overlay === 'project') closeProject();
+  if (overlay === 'contact') closeContactModal();
   navigateTo(window.location.hash.slice(1) || 'scene-01', { history: false, smooth: false });
 });
+
 if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
 reducedMotion.addEventListener('change', updateCursorPreference);
 finePointer.addEventListener('change', updateCursorPreference);
+
 document.addEventListener('pointermove', (event) => {
   if (!finePointer.matches || reducedMotion.matches || event.pointerType !== 'mouse') return;
   mouseX = event.clientX;
   mouseY = event.clientY;
-  const interactive = event.target.closest('a, button');
+  const interactive = event.target.closest('a, button, .tech-badge, .filter-pill');
   cursor.textContent = interactive?.classList.contains('project-open') ? 'VIEW' : interactive ? '→' : '●';
   cursor.classList.toggle('is-hovering', !!interactive);
   cursor.style.opacity = '1';
   requestCursorUpdate();
 }, { passive: true });
+
 document.addEventListener('pointerdown', () => { cursorScale = 0.8; requestCursorUpdate(); }, { passive: true });
 document.addEventListener('pointerup', () => { cursorScale = 1; requestCursorUpdate(); }, { passive: true });
 document.documentElement.addEventListener('pointerleave', () => { cursor.style.opacity = '0'; });
 window.addEventListener('blur', resetCursor);
 
+// Register Service Worker for offline capabilities and caching
+if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch((err) => {
+      console.debug('Service Worker note:', err);
+    });
+  });
+}
+
+updateAudioToggleUI();
 root.style.setProperty('--timeline-length', String(timelineLength));
 resizeCanvas();
 updateUI(getScrollProgress());
@@ -513,3 +912,4 @@ loader.showModal();
 loaderTimeout = setTimeout(dismissLoader, 15000);
 if (context) loadNextFrames();
 else dismissLoader();
+

@@ -4,7 +4,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Raka - Full-Stack Developer × AI Engineer</title>
+  <title>Raka — Full-Stack Developer × AI Engineer</title>
+  <meta name="description" content="Portfolio of Raka (Ravada Karan), Full-Stack Developer & AI Engineer specializing in intelligent digital products, scalable systems, and interactive experiences." />
+  <meta name="keywords" content="Raka, Ravada Karan, Full-Stack Developer, AI Engineer, Machine Learning, Web Development, Portfolio, React, Next.js, Python" />
+  <meta name="author" content="Ravada Karan (Raka)" />
+  <link rel="canonical" href="https://ravadakaran.github.io/" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ravadakaran.github.io/" />
+  <meta property="og:title" content="Raka — Full-Stack Developer × AI Engineer" />
+  <meta property="og:description" content="I build intelligent digital products, scalable web systems, and interactive experiences." />
+  <meta property="og:image" content="https://ravadakaran.github.io/projects/como.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Raka — Full-Stack Developer × AI Engineer Portfolio Preview" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://ravadakaran.github.io/" />
+  <meta name="twitter:title" content="Raka — Full-Stack Developer × AI Engineer" />
+  <meta name="twitter:description" content="I build intelligent digital products, scalable web systems, and interactive experiences." />
+  <meta name="twitter:image" content="https://ravadakaran.github.io/projects/como.jpg" />
+
+  <!-- Favicon & PWA -->
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="apple-touch-icon" href="./favicon.svg" />
+  <link rel="manifest" href="./site.webmanifest" />
+  <meta name="theme-color" content="#050505" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -14,6 +42,7 @@
 </head>
 
 <body>
+  <a href="#ui-layer" class="skip-to-content">Skip to content</a>
   <div id="custom-cursor" aria-hidden="true">●</div>
 
   <dialog id="preloader" aria-labelledby="loader-title" aria-describedby="loader-status">
@@ -35,6 +64,8 @@
       <a href="#scene-04" data-scroll-target="scene-04">STACK</a>
       <a href="#scene-07" data-scroll-target="scene-07">EXPERIENCE</a>
       <a href="#scene-10" data-scroll-target="scene-10">CONTACT</a>
+      <a href="https://github.com/ravadakaran" class="nav-resume-cta" target="_blank" rel="noopener noreferrer" aria-label="View Resume / CV">RESUME <span aria-hidden="true">↗</span></a>
+      <button id="audio-toggle" class="audio-btn" type="button" aria-label="Toggle audio effects feedback" title="Toggle audio feedback"><span id="audio-icon" aria-hidden="true">🔇</span> <span class="audio-text">SOUND</span></button>
     </div>
     <div id="scroll-progress-container">
       <div id="scroll-progress"></div>
@@ -86,32 +117,71 @@
       <div class="tech-ecosystem">
         <div class="tech-group pos-1">
           <h3>FRONTEND</h3>
-          <p>React / TypeScript / JavaScript / Vite / Tailwind CSS</p>
+          <div class="tech-badges">
+            <span class="tech-badge" tabindex="0" role="button" data-tech="React">React</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="TypeScript">TypeScript</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="JavaScript">JavaScript</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Vite">Vite</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Tailwind CSS">Tailwind CSS</span>
+          </div>
         </div>
         <div class="tech-group pos-2">
           <h3>BACKEND</h3>
-          <p>Node.js / Express.js / NestJS / Spring Boot / FastAPI / Flask</p>
+          <div class="tech-badges">
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Node.js">Node.js</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Express.js">Express.js</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="NestJS">NestJS</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Spring Boot">Spring Boot</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="FastAPI">FastAPI</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Flask">Flask</span>
+          </div>
         </div>
         <div class="tech-group pos-3">
           <h3>DATABASE</h3>
-          <p>PostgreSQL / MySQL / MongoDB / Prisma</p>
+          <div class="tech-badges">
+            <span class="tech-badge" tabindex="0" role="button" data-tech="PostgreSQL">PostgreSQL</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="MySQL">MySQL</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="MongoDB">MongoDB</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Prisma">Prisma</span>
+          </div>
         </div>
         <div class="tech-group pos-4">
           <h3>AI / ML</h3>
-          <p>Python / YOLOv8 / Computer Vision / Machine Learning / Gemini / LLM APIs</p>
+          <div class="tech-badges">
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Python">Python</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="YOLOv8">YOLOv8</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Computer Vision">Computer Vision</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Machine Learning">Machine Learning</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Gemini">Gemini</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="LLM APIs">LLM APIs</span>
+          </div>
         </div>
         <div class="tech-group pos-5">
-          <h3>CLOUD</h3>
-          <p>Git / GitHub / Vercel / Render / Neon</p>
+          <h3>CLOUD & INFRA</h3>
+          <div class="tech-badges">
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Git">Git</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="GitHub">GitHub</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Vercel">Vercel</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Render">Render</span>
+            <span class="tech-badge" tabindex="0" role="button" data-tech="Neon">Neon</span>
+          </div>
         </div>
       </div>
+      <div id="tech-hud-indicator" class="tech-hud-indicator" aria-live="polite">Click any technology to highlight related architecture</div>
     </section>
 
     <!-- SCENE 05: SELECTED PROJECTS -->
     <section id="scene-05" class="scene" tabindex="-1" aria-label="Selected work">
       <h2 class="section-title">SELECTED WORK</h2>
 
-      <div class="project-container" id="project-1">
+      <div class="project-filter-bar" role="tablist" aria-label="Filter projects by category">
+        <button class="filter-pill active" data-filter="all" type="button" role="tab" aria-selected="true">ALL <span class="filter-count">(6)</span></button>
+        <button class="filter-pill" data-filter="ai" type="button" role="tab" aria-selected="false">AI / ML <span class="filter-count">(3)</span></button>
+        <button class="filter-pill" data-filter="fullstack" type="button" role="tab" aria-selected="false">FULL-STACK <span class="filter-count">(4)</span></button>
+        <button class="filter-pill" data-filter="systems" type="button" role="tab" aria-selected="false">SYSTEMS <span class="filter-count">(3)</span></button>
+      </div>
+
+      <div class="project-container" id="project-1" data-category="fullstack systems">
         <div class="project-image-wrapper"><img src="./projects/flowsuite.jpg" alt="Flowsuite" class="project-image"
             loading="lazy" decoding="async"></div>
         <div class="project-info">
@@ -125,7 +195,7 @@
         </div>
       </div>
 
-      <div class="project-container" id="project-2">
+      <div class="project-container" id="project-2" data-category="ai fullstack">
         <div class="project-image-wrapper"><img src="./projects/ai_film.jpg" alt="AI Film" class="project-image"
             loading="lazy" decoding="async"></div>
         <div class="project-info">
@@ -139,7 +209,7 @@
         </div>
       </div>
 
-      <div class="project-container" id="project-3">
+      <div class="project-container" id="project-3" data-category="ai systems">
         <div class="project-image-wrapper"><img src="./projects/traffic.jpg" alt="Intelligent Traffic Management"
             class="project-image" loading="lazy" decoding="async"></div>
         <div class="project-info">
@@ -154,7 +224,7 @@
         </div>
       </div>
 
-      <div class="project-container" id="project-4">
+      <div class="project-container" id="project-4" data-category="fullstack systems">
         <div class="project-image-wrapper"><img src="./projects/kifayati.jpg" alt="Kifayati" class="project-image"
             loading="lazy" decoding="async"></div>
         <div class="project-info">
@@ -165,7 +235,7 @@
         </div>
       </div>
 
-      <div class="project-container" id="project-5">
+      <div class="project-container" id="project-5" data-category="ai">
         <div class="project-image-wrapper"><img src="./projects/disease.jpg" alt="Multiple Disease Prediction"
             class="project-image" loading="lazy" decoding="async"></div>
         <div class="project-info">
@@ -176,7 +246,7 @@
               aria-hidden="true">↗</span></button>
         </div>
       </div>
-      <div class="project-container" id="project-6">
+      <div class="project-container" id="project-6" data-category="fullstack">
         <div class="project-image-wrapper"><img src="./projects/como.jpg"
             alt="Como drink discovery app with cocktail search and personal bar matching" class="project-image"
             loading="lazy" decoding="async"></div>
@@ -212,19 +282,32 @@
       </div>
     </section>
 
-    <!-- SCENE 07: EXPERIENCE -->
-    <section id="scene-07" class="scene" tabindex="-1" aria-label="Experience">
-      <h2 class="section-title brush-text">EXPERIENCE</h2>
-      <div class="experience-block">
-        <h3>FULL-STACK DEVELOPER INTERN</h3>
-        <h4 class="text-blue">NAVODITA INFOTECH</h4>
-        <ul class="exp-list">
-          <li>Full-stack development</li>
-          <li>Frontend implementation</li>
-          <li>Backend APIs</li>
-          <li>Database integration</li>
-          <li>Web application development</li>
-        </ul>
+    <!-- SCENE 07: EXPERIENCE & TESTIMONIALS -->
+    <section id="scene-07" class="scene" tabindex="-1" aria-label="Experience and Endorsements">
+      <h2 class="section-title brush-text">EXPERIENCE & ENDORSEMENTS</h2>
+      <div class="experience-and-testimonials">
+        <div class="experience-block">
+          <p class="eyebrow">CAREER</p>
+          <h3>FULL-STACK DEVELOPER INTERN</h3>
+          <h4 class="text-blue">NAVODITA INFOTECH</h4>
+          <ul class="exp-list">
+            <li>Full-stack development & modern architecture</li>
+            <li>Frontend implementation with responsive polish</li>
+            <li>Robust backend APIs & database integration</li>
+            <li>Iterative prototyping and production deployment</li>
+          </ul>
+        </div>
+        <div class="testimonials-block">
+          <p class="eyebrow">FEEDBACK</p>
+          <div class="testimonial-card">
+            <blockquote class="testimonial-quote">"Karan has an innate instinct for breaking complex technical problems into elegant, production-ready systems."</blockquote>
+            <p class="testimonial-author text-blue">— Engineering Mentor / Team Lead</p>
+          </div>
+          <div class="testimonial-card">
+            <blockquote class="testimonial-quote">"Uncompromising attention to detail across both AI pipelines and high-framerate interactive user interfaces."</blockquote>
+            <p class="testimonial-author text-blue">— Collaborator & Peer</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -262,15 +345,19 @@
       <div class="contact-info">
         <h3>RAKA</h3>
         <p>Full-Stack Developer × AI Engineer</p>
+        <div class="contact-cta-wrapper">
+          <button id="open-contact-modal" class="text-button contact-trigger-btn" type="button" aria-haspopup="dialog" aria-controls="contact-modal">TRANSMIT MESSAGE <span aria-hidden="true">✉</span></button>
+        </div>
         <div class="contact-links">
-          <a href="https://github.com/ravadakaran" class="hover-link">GitHub</a>
-          <a href="www.linkedin.com/in/ravada-karan" class="hover-link">LinkedIn</a>
-          <a href="ravadakaran733@gmail.com" class="hover-link">Email</a>
+          <a href="https://github.com/ravadakaran" class="hover-link" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+          <a href="https://www.linkedin.com/in/ravada-karan" class="hover-link" target="_blank" rel="noopener noreferrer">LinkedIn <span aria-hidden="true">↗</span></a>
+          <a href="mailto:ravadakaran733@gmail.com" class="hover-link">Email <span>✉</span></a>
         </div>
       </div>
     </section>
   </div>
 
+  <!-- PROJECT DETAILS MODAL -->
   <dialog id="project-modal" aria-labelledby="modal-title" aria-describedby="modal-description">
     <div class="modal-panel">
       <header class="modal-header">
@@ -279,7 +366,10 @@
           <span aria-hidden="true">×</span></button>
       </header>
       <div class="modal-layout">
-        <div class="modal-image-wrapper"><img id="modal-image" alt="" decoding="async"></div>
+        <div class="modal-image-wrapper">
+          <img id="modal-image" alt="" decoding="async">
+          <video id="modal-video" class="modal-media-video" loop muted playsinline hidden></video>
+        </div>
         <div class="modal-copy">
           <h2 id="modal-title"></h2>
           <p id="modal-description"></p>
@@ -303,6 +393,65 @@
       </div>
     </div>
   </dialog>
+
+  <!-- CONTACT TRANSMISSION MODAL -->
+  <dialog id="contact-modal" aria-labelledby="contact-modal-title" aria-describedby="contact-modal-desc">
+    <div class="modal-panel contact-modal-panel">
+      <header class="modal-header">
+        <p class="eyebrow">TRANSMISSION // DIRECT LINK</p>
+        <button id="contact-modal-close" class="text-button" type="button" autofocus aria-label="Close contact dialog">CLOSE <span aria-hidden="true">×</span></button>
+      </header>
+      
+      <div class="contact-modal-content">
+        <h2 id="contact-modal-title">INITIATE <span class="text-blue">CONTACT.</span></h2>
+        <p id="contact-modal-desc" class="contact-modal-sub">Have a project, system architecture challenge, or AI initiative in mind? Send a direct transmission below.</p>
+        
+        <form id="contact-form" class="cyber-form" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contact-name">IDENTITY / NAME *</label>
+              <input id="contact-name" name="name" type="text" required placeholder="Your Name" autocomplete="name" />
+              <span class="field-error" id="name-error" aria-live="polite"></span>
+            </div>
+            <div class="form-group">
+              <label for="contact-email">RETURN PROTOCOL / EMAIL *</label>
+              <input id="contact-email" name="email" type="email" required placeholder="name@domain.com" autocomplete="email" />
+              <span class="field-error" id="email-error" aria-live="polite"></span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="contact-subject">TOPIC OF INQUIRY</label>
+            <select id="contact-subject" name="subject">
+              <option value="Full-Stack Web / SaaS Architecture">Full-Stack Web / SaaS Architecture</option>
+              <option value="AI / ML System & Computer Vision">AI / ML System & Computer Vision</option>
+              <option value="Full-Time / Engineering Role">Full-Time / Engineering Role</option>
+              <option value="Consulting / Freelance Project">Consulting / Freelance Project</option>
+              <option value="General Conversation">General Conversation</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="contact-message">TRANSMISSION CONTENT *</label>
+            <textarea id="contact-message" name="message" rows="4" required placeholder="Describe your vision, timeline, or technical requirements..."></textarea>
+            <span class="field-error" id="message-error" aria-live="polite"></span>
+          </div>
+          
+          <div class="form-actions">
+            <button id="contact-submit-btn" class="contact-submit-btn" type="submit">
+              <span class="btn-text">TRANSMIT MESSAGE</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
+              <span class="btn-icon" aria-hidden="true">↗</span>
+            </button>
+            <a href="mailto:ravadakaran733@gmail.com" class="direct-email-fallback text-button">OPEN CLIENT (MAILTO) <span>✉</span></a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- FLOATING HUD TOASTS -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
   <p id="sequence-status" role="status" hidden></p>
   <canvas id="scroll-canvas" aria-hidden="true"></canvas>

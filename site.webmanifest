@@ -1,0 +1,17 @@
+{
+  "name": "Raka — Full-Stack Developer × AI Engineer",
+  "short_name": "Raka",
+  "description": "Portfolio of Raka (Ravada Karan), Full-Stack Developer & AI Engineer specializing in intelligent products, scalable systems, and interactive web experiences.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
