@@ -8,9 +8,9 @@ Track progress for new features, performance optimizations, and deployment prepa
 - [x] **Resume PDF Integration**:
   - [x] Update navbar `RESUME ↗` CTA and contact links to directly link to local [`resume/resume.pdf`](file:///d:/New%20Portfolio/resume/resume.pdf) with fallback download options
   - [x] Add direct preview/download trigger in Scene 10 (Contact)
-- [ ] **Real Contact Form Transmission**:
-  - [ ] Wire [`#contact-form`](file:///d:/New%20Portfolio/index.html) to a serverless email service (Web3Forms / Formspree) so messages deliver directly to `ravadakaran733@gmail.com`
-  - [ ] Add graceful offline/network failure retry handling
+- [x] **Real Contact Form Transmission**:
+  - [x] Wire [`#contact-form`](file:///d:/New%20Portfolio/index.html) to serverless email service (Web3Forms) so messages deliver directly to `ravadakaran733@gmail.com`
+  - [x] Add graceful offline/network failure handling and mailto fallback
 
 ---
 
@@ -34,6 +34,13 @@ Track progress for new features, performance optimizations, and deployment prepa
   - [x] Interactive HUD inspector revealing protocols, latency, and Karan's stack choices at each stage
 - [x] **Matrix Digital Rain Easter Egg**:
   - [x] Canvas-driven digital code rain overlay triggered via command palette (`matrix`) or click-to-dismiss
+- [x] **Background Music Audio Engine (`Mandragora - Shiva`)**:
+  - [x] Integrate high-energy psytrance soundtrack (`background/Mandragora-Shiva-SnapYT.App.mp3`)
+  - [x] Cyber navbar controller with animated 4-bar equalizer visualizer
+  - [x] Mini HUD audio dock with volume slider, play/pause controls, and track metadata
+  - [x] Smooth fade-in / fade-out to prevent audio pops
+  - [x] Command Palette (`⌘K`) quick commands and RAKA-BOT conversational controls
+  - [x] `localStorage` persistence and gesture-safe browser playback
 
 ---
 

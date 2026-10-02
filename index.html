@@ -68,6 +68,7 @@
       <button id="cmd-palette-btn" class="nav-cmd-btn" type="button" aria-label="Open Command Palette (Ctrl+K)" title="Command Palette (Ctrl+K)"><kbd>⌘K</kbd></button>
       <button id="theme-toggle" class="theme-btn" type="button" aria-label="Cycle theme accent color" title="Cycle Accent Color"><span id="theme-dot" class="theme-dot" aria-hidden="true"></span> <span id="theme-name">CYAN</span></button>
       <button id="audio-toggle" class="audio-btn" type="button" aria-label="Toggle audio effects feedback" title="Toggle audio feedback"><span id="audio-icon" aria-hidden="true">🔇</span> <span class="audio-text">SOUND</span></button>
+      <button id="bgm-toggle" class="bgm-btn" type="button" aria-label="Toggle background music: Mandragora - Shiva" title="Background Music: Mandragora - Shiva (Click to Play/Pause)" aria-pressed="false"><span class="bgm-bars" aria-hidden="true"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></span> <span class="bgm-text">BGM</span> <span id="bgm-state" class="bgm-state">OFF</span></button>
     </div>
     <div id="scroll-progress-container">
       <div id="scroll-progress"></div>
@@ -559,6 +560,9 @@
         <p id="contact-modal-desc" class="contact-modal-sub">Have a project, system architecture challenge, or AI initiative in mind? Send a direct transmission below.</p>
         
         <form id="contact-form" class="cyber-form" novalidate>
+          <input type="hidden" name="access_key" value="1cbc6110-f924-43d2-bd6a-10033565f349" />
+          <input type="hidden" name="from_name" value="Raka Portfolio Contact" />
+          <input type="checkbox" name="botcheck" class="hidden" style="display: none;" tabindex="-1" autocomplete="off" />
           <div class="form-row">
             <div class="form-group">
               <label for="contact-name">IDENTITY / NAME *</label>
@@ -614,6 +618,7 @@
         <button class="cmd-tag" type="button" data-cmd="work">WORK</button>
         <button class="cmd-tag" type="button" data-cmd="ai">AI / ML</button>
         <button class="cmd-tag" type="button" data-cmd="theme">THEME</button>
+        <button class="cmd-tag" type="button" data-cmd="bgm">BGM</button>
         <button class="cmd-tag" type="button" data-cmd="resume">RESUME</button>
         <button class="cmd-tag" type="button" data-cmd="contact">TRANSMIT</button>
         <button class="cmd-tag" type="button" data-cmd="matrix">MATRIX</button>
@@ -632,6 +637,38 @@
 
   <!-- MATRIX CANVAS EASTER EGG OVERLAY -->
   <canvas id="matrix-canvas" class="matrix-canvas" hidden aria-hidden="true"></canvas>
+
+  <!-- CYBER BGM HUD PLAYER -->
+  <aside id="bgm-hud" class="bgm-hud" aria-label="Now Playing Audio Controller" hidden>
+    <div class="bgm-hud-accent-bar" aria-hidden="true"></div>
+    <div class="bgm-hud-main">
+      <div class="bgm-hud-icon-wrap">
+        <span class="bgm-hud-badge" aria-hidden="true">BGM</span>
+        <div class="bgm-hud-bars" aria-hidden="true">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
+      </div>
+      <div class="bgm-hud-info">
+        <div class="bgm-hud-tag">CYBER AMBIENCE // PSYTRANCE</div>
+        <div class="bgm-hud-title" title="Mandragora - Shiva">Mandragora — Shiva</div>
+        <div class="bgm-hud-sub">High-tempo audio loop • 138 BPM</div>
+      </div>
+      <div class="bgm-hud-actions">
+        <button id="bgm-hud-play-btn" class="bgm-hud-btn" type="button" aria-label="Play or pause background music" title="Play / Pause">
+          <span id="bgm-hud-play-icon">▶</span>
+        </button>
+        <div class="bgm-hud-volume-wrap">
+          <button id="bgm-hud-mute-btn" class="bgm-hud-mute-btn" type="button" aria-label="Mute or unmute background music" title="Mute / Unmute">🔊</button>
+          <input type="range" id="bgm-hud-volume" class="bgm-hud-slider" min="0" max="1" step="0.05" value="0.35" aria-label="Background music volume">
+          <span id="bgm-hud-vol-text" class="bgm-hud-vol-text">35%</span>
+        </div>
+        <button id="bgm-hud-close" class="bgm-hud-close" type="button" aria-label="Minimize music HUD" title="Minimize player">×</button>
+      </div>
+    </div>
+  </aside>
 
   <!-- RAKA-BOT FLOATING ACTION TRIGGER -->
   <button id="rakabot-fab" class="rakabot-fab" type="button" aria-haspopup="dialog" aria-controls="rakabot-dialog" aria-label="Open RAKA-BOT AI Assistant">
@@ -654,6 +691,7 @@
         <button class="rakabot-chip" type="button" data-prompt="What did Karan build with YOLOv8?">YOLOv8 Project</button>
         <button class="rakabot-chip" type="button" data-prompt="Tell me about Flowsuite architecture">Flowsuite Architecture</button>
         <button class="rakabot-chip" type="button" data-prompt="What backend frameworks does he know?">Backend Stack</button>
+        <button class="rakabot-chip" type="button" data-prompt="Play background music">Soundtrack / BGM</button>
         <button class="rakabot-chip" type="button" data-prompt="Is Karan open for full-time or contract roles?">Availability / Hiring</button>
         <button class="rakabot-chip" type="button" data-prompt="How can I get his resume and contact him?">Resume & Contact</button>
       </div>

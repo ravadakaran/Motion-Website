@@ -79,6 +79,17 @@ const ghActiveLang = document.getElementById('gh-active-lang');
 const audioToggleBtn = document.getElementById('audio-toggle');
 const audioIcon = document.getElementById('audio-icon');
 
+// Background Music Elements
+const bgmToggleBtn = document.getElementById('bgm-toggle');
+const bgmStateEl = document.getElementById('bgm-state');
+const bgmHud = document.getElementById('bgm-hud');
+const bgmHudPlayBtn = document.getElementById('bgm-hud-play-btn');
+const bgmHudPlayIcon = document.getElementById('bgm-hud-play-icon');
+const bgmHudMuteBtn = document.getElementById('bgm-hud-mute-btn');
+const bgmHudVolume = document.getElementById('bgm-hud-volume');
+const bgmHudVolText = document.getElementById('bgm-hud-vol-text');
+const bgmHudClose = document.getElementById('bgm-hud-close');
+
 // Theme Switcher Elements
 const themeToggleBtn = document.getElementById('theme-toggle');
 const themeNameEl = document.getElementById('theme-name');
@@ -178,6 +189,16 @@ let cursorTicking = false;
 // Web Audio API Synthesizer State
 let audioCtx = null;
 let soundEnabled = localStorage.getItem('raka_sound_enabled') === 'true';
+
+// Background Music State (Mandragora - Shiva)
+const BGM_TRACK_URL = './background/Mandragora-Shiva-SnapYT.App.mp3';
+let bgmAudio = null;
+let bgmPlaying = false;
+let bgmTargetVolume = parseFloat(localStorage.getItem('raka_bgm_vol') || '0.35');
+if (isNaN(bgmTargetVolume) || bgmTargetVolume < 0 || bgmTargetVolume > 1) bgmTargetVolume = 0.35;
+let bgmMuted = localStorage.getItem('raka_bgm_muted') === 'true';
+let bgmFadeTimer = null;
+let bgmUserInitiated = localStorage.getItem('raka_bgm_enabled') === 'true';
 
 // Theme Configuration
 const THEMES = ['cyan', 'emerald', 'amber', 'violet'];
@@ -530,6 +551,158 @@ function updateAudioToggleUI() {
   audioIcon.textContent = soundEnabled ? '🔊' : '🔇';
   audioToggleBtn.title = soundEnabled ? 'Audio Feedback Active (Click to Mute)' : 'Audio Feedback Muted (Click to Enable)';
   audioToggleBtn.setAttribute('aria-pressed', soundEnabled ? 'true' : 'false');
+}
+
+// ==========================================
+// BACKGROUND MUSIC CONTROLLER (Mandragora - Shiva)
+// ==========================================
+function initBgmAudio() {
+  if (!bgmAudio) {
+    bgmAudio = new Audio();
+    bgmAudio.src = BGM_TRACK_URL;
+    bgmAudio.loop = true;
+    bgmAudio.preload = 'metadata';
+    bgmAudio.volume = bgmMuted ? 0 : bgmTargetVolume;
+
+    bgmAudio.addEventListener('ended', () => {
+      bgmAudio.currentTime = 0;
+      bgmAudio.play().catch(() => {});
+    });
+
+    bgmAudio.addEventListener('error', (e) => {
+      console.warn('BGM Audio Error:', e);
+      bgmPlaying = false;
+      updateBgmUI();
+    });
+  }
+}
+
+function fadeBgmVolume(target, duration = 600, callback = null) {
+  if (!bgmAudio) return;
+  clearInterval(bgmFadeTimer);
+  const startVol = bgmAudio.volume;
+  const delta = target - startVol;
+  const steps = 20;
+  const stepTime = duration / steps;
+  let currentStep = 0;
+
+  bgmFadeTimer = setInterval(() => {
+    currentStep++;
+    const progress = currentStep / steps;
+    const newVol = Math.max(0, Math.min(1, startVol + delta * progress));
+    bgmAudio.volume = newVol;
+    if (currentStep >= steps) {
+      clearInterval(bgmFadeTimer);
+      bgmAudio.volume = target;
+      if (callback) callback();
+    }
+  }, stepTime);
+}
+
+function playBgm(showToastMsg = true) {
+  initBgmAudio();
+  if (!bgmAudio) return;
+
+  const actualTarget = bgmMuted ? 0 : bgmTargetVolume;
+  bgmAudio.volume = 0;
+
+  const playPromise = bgmAudio.play();
+  if (playPromise !== undefined) {
+    playPromise.then(() => {
+      bgmPlaying = true;
+      localStorage.setItem('raka_bgm_enabled', 'true');
+      fadeBgmVolume(actualTarget, 650);
+      updateBgmUI();
+      if (showToastMsg) {
+        showToast('▶ BGM: Mandragora — Shiva [35% Vol]', 'info');
+      }
+    }).catch((err) => {
+      console.warn('BGM Play prevented by browser:', err);
+      bgmPlaying = false;
+      updateBgmUI();
+    });
+  }
+}
+
+function pauseBgm(showToastMsg = true) {
+  if (!bgmAudio) return;
+  fadeBgmVolume(0, 350, () => {
+    bgmAudio.pause();
+    bgmPlaying = false;
+    localStorage.setItem('raka_bgm_enabled', 'false');
+    updateBgmUI();
+    if (showToastMsg) {
+      showToast('⏸ BGM PAUSED', 'info');
+    }
+  });
+}
+
+function toggleBgm() {
+  if (bgmPlaying) {
+    pauseBgm();
+  } else {
+    playBgm();
+    if (bgmHud) bgmHud.hidden = false;
+  }
+}
+
+function setBgmVolume(val) {
+  bgmTargetVolume = Math.max(0, Math.min(1, val));
+  localStorage.setItem('raka_bgm_vol', String(bgmTargetVolume));
+  if (bgmTargetVolume > 0 && bgmMuted) {
+    bgmMuted = false;
+    localStorage.setItem('raka_bgm_muted', 'false');
+  }
+  if (bgmAudio && bgmPlaying && !bgmMuted) {
+    bgmAudio.volume = bgmTargetVolume;
+  }
+  updateBgmUI();
+}
+
+function toggleBgmMute() {
+  bgmMuted = !bgmMuted;
+  localStorage.setItem('raka_bgm_muted', String(bgmMuted));
+  if (bgmAudio) {
+    bgmAudio.volume = bgmMuted ? 0 : bgmTargetVolume;
+  }
+  updateBgmUI();
+  showToast(bgmMuted ? '🔇 BGM MUTED' : `🔊 BGM UNMUTED (${Math.round(bgmTargetVolume * 100)}%)`, 'info');
+}
+
+function updateBgmUI() {
+  const isPlaying = bgmPlaying && (!bgmAudio || !bgmAudio.paused);
+
+  if (bgmToggleBtn) {
+    bgmToggleBtn.classList.toggle('is-playing', isPlaying);
+    bgmToggleBtn.setAttribute('aria-pressed', isPlaying ? 'true' : 'false');
+    bgmToggleBtn.title = isPlaying
+      ? 'Background Music Active: Mandragora - Shiva (Click to Pause)'
+      : 'Background Music: Mandragora - Shiva (Click to Play)';
+  }
+  if (bgmStateEl) {
+    bgmStateEl.textContent = isPlaying ? 'ON' : 'OFF';
+  }
+
+  if (bgmHudPlayIcon) {
+    bgmHudPlayIcon.textContent = isPlaying ? '⏸' : '▶';
+  }
+  if (bgmHudPlayBtn) {
+    bgmHudPlayBtn.setAttribute('aria-label', isPlaying ? 'Pause background music' : 'Play background music');
+    bgmHudPlayBtn.title = isPlaying ? 'Pause' : 'Play';
+  }
+  if (bgmHud) {
+    bgmHud.classList.toggle('is-playing', isPlaying);
+  }
+  if (bgmHudVolume) {
+    bgmHudVolume.value = String(bgmTargetVolume);
+  }
+  if (bgmHudVolText) {
+    bgmHudVolText.textContent = bgmMuted ? 'MUTED' : `${Math.round(bgmTargetVolume * 100)}%`;
+  }
+  if (bgmHudMuteBtn) {
+    bgmHudMuteBtn.textContent = bgmMuted || bgmTargetVolume === 0 ? '🔇' : (bgmTargetVolume < 0.5 ? '🔉' : '🔊');
+    bgmHudMuteBtn.title = bgmMuted ? 'Unmute' : 'Mute';
+  }
 }
 
 // ==========================================
@@ -1192,6 +1365,16 @@ function getRakabotResponse(query) {
     return 'Karan worked as a <strong>Full-Stack Developer Intern at Navodita Infotech</strong>, where he engineered modern full-stack architectures, responsive frontend interfaces, robust database integrations, and scalable production deployment pipelines.';
   }
 
+  if (q.includes('music') || q.includes('bgm') || q.includes('soundtrack') || q.includes('song') || q.includes('shiva') || q.includes('mandragora')) {
+    if (q.includes('stop') || q.includes('pause') || q.includes('mute') || q.includes('off') || q.includes('quiet')) {
+      if (bgmPlaying) pauseBgm();
+      return 'Background music paused. You can resume the cyber soundtrack anytime by hitting <strong>BGM</strong> in the navbar or typing <strong>music</strong> in the command palette.';
+    }
+    if (!bgmPlaying) playBgm();
+    if (bgmHud) bgmHud.hidden = false;
+    return 'Now playing: <strong>"Shiva" by Mandragora</strong> from Karan\'s background cyber sound library. High-energy Brazilian psytrance configured to loop for high-intensity engineering sessions!';
+  }
+
   if (q.includes('hello') || q.includes('hi') || q.includes('hey') || q.includes('who')) {
     return 'Greetings! I am <strong>RAKA-BOT</strong>, the AI system persona representing <strong>Ravada Karan (Raka)</strong>. Ask me about his projects (Flowsuite, YOLOv8 Traffic, Como, AI Film), technical stack, hiring status, or click any prompt chip above!';
   }
@@ -1310,19 +1493,42 @@ if (contactForm) {
       return;
     }
 
-    // Submit state simulation
+    // Real Web3Forms Transmission
     contactSubmitBtn.disabled = true;
     contactSubmitBtn.classList.add('is-sending');
     playTone(440, 'sine', 0.1, 0.03);
 
-    setTimeout(() => {
-      contactSubmitBtn.disabled = false;
-      contactSubmitBtn.classList.remove('is-sending');
-      playSuccessSound();
-      showToast('TRANSMISSION SENT: Thank you for reaching out. I will reply promptly.', 'success');
-      contactForm.reset();
-      setTimeout(closeContactModal, 1200);
-    }, 1100);
+    const formData = new FormData(contactForm);
+    const formJson = JSON.stringify(Object.fromEntries(formData));
+
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: formJson
+    })
+      .then(async (response) => {
+        const result = await response.json();
+        if (response.status === 200 && result.success) {
+          playSuccessSound();
+          showToast('TRANSMISSION DELIVERED: Message sent directly to Karan\'s inbox!', 'success');
+          contactForm.reset();
+          setTimeout(closeContactModal, 1500);
+        } else {
+          throw new Error(result.message || 'Transmission failed');
+        }
+      })
+      .catch((err) => {
+        console.warn('Web3Forms transmission error:', err);
+        playErrorSound();
+        showToast('TRANSMISSION FAILED: Network error. Please use the OPEN CLIENT (MAILTO) link below.', 'error');
+      })
+      .finally(() => {
+        contactSubmitBtn.disabled = false;
+        contactSubmitBtn.classList.remove('is-sending');
+      });
   });
 }
 
@@ -1426,12 +1632,24 @@ function cycleTheme() {
 // PIPELINE SIMULATION & INTERACTIVE STEPS
 // ==========================================
 let pipelineSimulating = false;
+let simulationTimeouts = [];
+
+function clearSimulation() {
+  simulationTimeouts.forEach(t => clearTimeout(t));
+  simulationTimeouts = [];
+  pipelineSimulating = false;
+  scene03Steps.forEach(s => s.classList.remove('is-simulating'));
+  if (simulatePipelineBtn) {
+    simulatePipelineBtn.disabled = false;
+    simulatePipelineBtn.innerHTML = '<span class="pulse-icon" aria-hidden="true">▶</span> RUN PIPELINE SIMULATION';
+  }
+}
 
 function setupPipelineSteps(steps, hudEl) {
   steps.forEach((step) => {
     const handleInspect = () => {
-      if (pipelineSimulating) return;
-      steps.forEach(s => s.classList.remove('is-active-step'));
+      if (pipelineSimulating) clearSimulation();
+      steps.forEach(s => s.classList.remove('is-simulating', 'is-active-step'));
       step.classList.add('is-active-step');
       const stepName = step.dataset.step || step.textContent.trim();
       const detail = step.dataset.detail || '';
@@ -1453,42 +1671,59 @@ function setupPipelineSteps(steps, hudEl) {
 }
 
 function runPipelineSimulation() {
-  if (pipelineSimulating) return;
+  if (pipelineSimulating) {
+    clearSimulation();
+    if (pipelineHud03) {
+      pipelineHud03.innerHTML = '<span class="hud-title">[PAUSED]</span> Pipeline simulation paused. Click any stage to inspect details at your own pace.';
+    }
+    return;
+  }
+
   pipelineSimulating = true;
-  if (simulatePipelineBtn) simulatePipelineBtn.disabled = true;
+  if (simulatePipelineBtn) {
+    simulatePipelineBtn.disabled = false;
+    simulatePipelineBtn.innerHTML = '<span class="pulse-icon" aria-hidden="true">⏹</span> STOP SIMULATION';
+  }
 
   if (pipelineHud03) {
-    pipelineHud03.innerHTML = '<span class="hud-title">[TRANSMISSION]</span> Injecting synthetic data packet through pipeline architecture...';
+    pipelineHud03.innerHTML = '<span class="hud-title">[TRANSMISSION]</span> Injecting synthetic data packet through architecture pipeline...';
     pipelineHud03.classList.add('is-highlighted');
   }
 
   const baseFreq = 300 * (THEME_FREQ_MULTIPLIER[currentTheme] || 1.0);
-  const stepDelay = 220;
+  const stepDelay = 2200; // 2.2s per stage so viewers can comfortably read the architecture details
 
   scene03Steps.forEach((step, idx) => {
-    setTimeout(() => {
+    const t = setTimeout(() => {
       scene03Steps.forEach(s => s.classList.remove('is-simulating', 'is-active-step'));
       step.classList.add('is-simulating');
       const stepName = step.dataset.step || step.textContent.trim();
       const detail = step.dataset.detail || '';
       if (pipelineHud03) {
-        pipelineHud03.innerHTML = `<span class="hud-title">[STEP ${idx + 1}/${scene03Steps.length}: ${escapeHTML(stepName)}]</span> ${escapeHTML(detail)}`;
+        pipelineHud03.innerHTML = `<span class="hud-title">[STAGE ${idx + 1}/${scene03Steps.length}: ${escapeHTML(stepName)}]</span> ${escapeHTML(detail)}`;
       }
-      playTone(baseFreq + idx * 80, 'sine', 0.12, 0.04);
+      if (simulatePipelineBtn) {
+        simulatePipelineBtn.innerHTML = `<span class="pulse-icon" aria-hidden="true">⏹</span> [STAGE ${idx + 1}/8: ${escapeHTML(stepName)}] STOP`;
+      }
+      playTone(baseFreq + idx * 70, 'sine', 0.14, 0.04);
     }, idx * stepDelay);
+    simulationTimeouts.push(t);
   });
 
   const totalTime = scene03Steps.length * stepDelay;
-  setTimeout(() => {
+  const finishTimeout = setTimeout(() => {
     scene03Steps.forEach(s => s.classList.remove('is-simulating'));
     pipelineSimulating = false;
-    if (simulatePipelineBtn) simulatePipelineBtn.disabled = false;
+    if (simulatePipelineBtn) {
+      simulatePipelineBtn.innerHTML = '<span class="pulse-icon" aria-hidden="true">▶</span> RUN PIPELINE SIMULATION';
+    }
     playSuccessSound();
     if (pipelineHud03) {
-      pipelineHud03.innerHTML = '<span class="hud-title">[VERIFIED 100%]</span> End-to-end pipeline execution complete. Zero bottlenecks detected.';
+      pipelineHud03.innerHTML = '<span class="hud-title">[VERIFIED 100%]</span> End-to-end pipeline execution complete. All 8 architecture stages operational with zero bottlenecks.';
     }
     showToast('PIPELINE SIMULATION COMPLETE: All 8 stages verified', 'success');
-  }, totalTime + 200);
+  }, totalTime + 400);
+  simulationTimeouts.push(finishTimeout);
 }
 
 // ==========================================
@@ -1542,6 +1777,9 @@ const CMD_ACTIONS = [
   { id: 'cmd-contact', group: 'System Commands', icon: '📡', title: 'transmit message', sub: 'Open Direct Transmission Modal', action: () => openContactModal(cmdPaletteBtn) },
   { id: 'cmd-simulate', group: 'System Commands', icon: '▶️', title: 'simulate pipeline', sub: 'Run Scene 03 end-to-end data pipeline', action: () => { navigateTo('scene-03'); setTimeout(runPipelineSimulation, 700); } },
   { id: 'cmd-sound', group: 'System Commands', icon: '🔊', title: 'toggle audio feedback', sub: 'Toggle Web Audio SFX on/off', action: () => audioToggleBtn && audioToggleBtn.click() },
+  { id: 'cmd-bgm', group: 'System Commands', icon: '🎵', title: 'toggle background music', sub: 'Mandragora — Shiva (Psytrance BGM)', action: toggleBgm },
+  { id: 'cmd-bgm-hud', group: 'System Commands', icon: '🎛️', title: 'open music controller HUD', sub: 'Adjust BGM volume & player', action: () => { if (bgmHud) bgmHud.hidden = false; } },
+  { id: 'cmd-bgm-mute', group: 'System Commands', icon: '🔇', title: 'mute / unmute background music', sub: 'Quickly toggle audio mute', action: toggleBgmMute },
   { id: 'cmd-bot', group: 'System Commands', icon: '🤖', title: 'ask raka-bot', sub: 'Open AI System Assistant', action: openRakabot },
   { id: 'cmd-matrix', group: 'System Commands', icon: '🟩', title: 'matrix', sub: 'Toggle Matrix Digital Rain easter egg', action: toggleMatrixRain }
 ];
@@ -2031,6 +2269,51 @@ setupPipelineSteps(scene03Steps, pipelineHud03);
 setupPipelineSteps(scene06Steps, pipelineHud06);
 syncGitHubTelemetry();
 updateAudioToggleUI();
+updateBgmUI();
+
+// Background Music Listeners
+if (bgmToggleBtn) {
+  bgmToggleBtn.addEventListener('click', toggleBgm);
+}
+if (bgmHudPlayBtn) {
+  bgmHudPlayBtn.addEventListener('click', toggleBgm);
+}
+if (bgmHudMuteBtn) {
+  bgmHudMuteBtn.addEventListener('click', toggleBgmMute);
+}
+if (bgmHudVolume) {
+  bgmHudVolume.addEventListener('input', (e) => {
+    setBgmVolume(parseFloat(e.target.value));
+  });
+}
+if (bgmHudClose) {
+  bgmHudClose.addEventListener('click', () => {
+    if (bgmHud) bgmHud.hidden = true;
+  });
+}
+
+// User-gesture auto-resume if BGM was previously active
+const handleFirstInteraction = () => {
+  if (bgmUserInitiated && !bgmPlaying) {
+    playBgm(false);
+  }
+};
+window.addEventListener('click', handleFirstInteraction, { once: true });
+window.addEventListener('keydown', handleFirstInteraction, { once: true });
+window.addEventListener('touchstart', handleFirstInteraction, { once: true });
+
+// Duck audio when tab is backgrounded
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (bgmAudio && bgmPlaying && !bgmMuted) {
+      bgmAudio.volume = Math.max(0.05, bgmTargetVolume * 0.3);
+    }
+  } else {
+    if (bgmAudio && bgmPlaying && !bgmMuted) {
+      bgmAudio.volume = bgmTargetVolume;
+    }
+  }
+});
 root.style.setProperty('--timeline-length', String(timelineLength));
 resizeCanvas();
 updateUI(getScrollProgress());
