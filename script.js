@@ -136,6 +136,10 @@ const PROJECT_LINKS = {
   'project-6': {
     live: 'https://como-phi.vercel.app/',
     repository: 'https://github.com/ravadakaran/como'
+  },
+  'project-7': {
+    live: 'https://ai-dj-studio-ten.vercel.app',
+    repository: 'https://github.com/ravadakaran/Spotify-DJ-AI'
   }
 };
 
@@ -146,7 +150,8 @@ const PROJECT_VIDEOS = {
   'project-3': '',
   'project-4': '',
   'project-5': '',
-  'project-6': ''
+  'project-6': '',
+  'project-7': ''
 };
 
 const projects = projectElements.map((element, index) => ({
@@ -874,6 +879,20 @@ const PROJECT_DETAILS = {
     ],
     metrics: ['<2ms Recipe Matching', '100% Client-Side Search', '500+ Hand-Curated Recipes'],
     sandbox: 'como'
+  },
+  'project-7': {
+    architecture: [
+      { layer: 'AUTHORITATIVE ROOM ENGINE', desc: 'Single-node in-memory room authority coordinated over low-latency Socket.IO event buses, ensuring zero queue drift across dozens of connected listeners.' },
+      { layer: 'HARMONIC MIXING & CAMELOT MATRIX', desc: 'BPM detection and Camelot 12-tone wheel harmonic compatibility algorithms calculating optimal crossfade cues and key energy lifts.' },
+      { layer: 'SENTIMENT-AWARE AUDIO ADAPTATION', desc: 'Continuous natural language chat sentiment scoring that dynamically modulates queue energy, tempo progression, and automated DJ banter.' },
+      { layer: 'PERSISTENCE & REPLICA TRANSACTIONS', desc: 'MongoDB with replica-set transactions, Mongoose schemas, and four-role access control (Host, DJ, VIP, Listener).' }
+    ],
+    challenges: [
+      { title: 'Sub-30ms Synchronized Queue Transitions', desc: 'Engineered an authoritative master clock with drift compensation that syncs track cues and real-time votes across multi-browser clients without stutter.' },
+      { title: 'Real-Time Crowd Sentiment & Banter Synthesizer', desc: 'Constructed an asynchronous text Q&A and segue generation engine with strict fallback guardrails that approved DJ banter without audio interruption.' }
+    ],
+    metrics: ['<30ms Socket Sync', '100% Harmonic Match', 'Multi-Room Concurrency'],
+    sandbox: 'spotifydj'
   }
 };
 
@@ -1078,6 +1097,55 @@ function renderProjectSandbox(type) {
         </div>
       `;
 
+    case 'spotifydj':
+      return `
+        <div class="dj-mixer-ui">
+          <div class="sandbox-header">
+            <span class="sandbox-title">HARMONIC MIXING & SENTIMENT AUDIO ENGINE</span>
+            <span class="sandbox-readout" id="dj-status-readout" style="color:#00ff9d;font-weight:700;">SYNC: LOCKED (128 BPM // 8A ⇄ 9A)</span>
+          </div>
+          <p style="font-size:0.75rem;opacity:0.8;">Test Camelot Wheel harmonic key matching, authoritative crossfade cues, and live crowd sentiment adaptation:</p>
+          <div class="dj-decks-grid">
+            <div class="dj-deck active" id="dj-deck-a">
+              <div class="deck-tag">DECK A (MASTER)</div>
+              <div class="deck-track-title">Cybernetic Pulse</div>
+              <div class="deck-meta">
+                <span class="camelot-pill">8A / A-Min</span>
+                <span class="bpm-pill">128 BPM</span>
+                <span style="color:var(--blue);font-weight:700;" id="deck-a-gain">100% Vol</span>
+              </div>
+            </div>
+            <div class="dj-deck" id="dj-deck-b">
+              <div class="deck-tag">DECK B (CUE SYNC)</div>
+              <div class="deck-track-title">Neon Horizon</div>
+              <div class="deck-meta">
+                <span class="camelot-pill match">9A / E-Min (HARMONIC +1)</span>
+                <span class="bpm-pill">128 BPM</span>
+                <span style="color:#00ff9d;font-weight:700;" id="deck-b-gain">0% Vol</span>
+              </div>
+            </div>
+          </div>
+          <div class="slider-group" style="margin-top:0.75rem;">
+            <label for="dj-crossfader">
+              <span>CROSSFADER (DECK A ⇄ DECK B)</span>
+              <span id="crossfader-pos" style="color:var(--blue);font-weight:700;">DECK A (100%)</span>
+            </label>
+            <input type="range" id="dj-crossfader" class="sandbox-slider" min="0" max="100" value="0" />
+          </div>
+          <div class="slider-group" style="margin-top:0.5rem;">
+            <label for="crowd-sentiment-slider">
+              <span>LIVE CHAT CROWD SENTIMENT GAUGE</span>
+              <span id="sentiment-val" style="color:#00ff9d;font-weight:700;">HYPE (+85% POSITIVE)</span>
+            </label>
+            <input type="range" id="crowd-sentiment-slider" class="sandbox-slider" min="0" max="100" value="85" />
+          </div>
+          <div class="dj-banter-card" id="dj-banter-card" style="margin-top:0.75rem;">
+            <div style="color:var(--blue);font-weight:700;font-size:0.7rem;letter-spacing:1px;">AI DJ BANTER &amp; SEGUE (GROUNDED LLM)</div>
+            <p id="dj-banter-text" style="font-size:0.75rem;margin-top:0.3rem;opacity:0.9;line-height:1.5;">"Crowd excitement is locking in at 85%! Initiating harmonic transition from 8A to 9A on Deck B. Keep the queue votes coming for the Soundclash battle!"</p>
+          </div>
+        </div>
+      `;
+
     default:
       return '<div class="sandbox-readout">Sandbox initialized for this project.</div>';
   }
@@ -1278,6 +1346,54 @@ function attachSandboxListeners(type) {
         }, 600);
       });
     }
+  } else if (type === 'spotifydj') {
+    const fader = document.getElementById('dj-crossfader');
+    const faderPos = document.getElementById('crossfader-pos');
+    const deckA = document.getElementById('dj-deck-a');
+    const deckB = document.getElementById('dj-deck-b');
+    const deckAGain = document.getElementById('deck-a-gain');
+    const deckBGain = document.getElementById('deck-b-gain');
+    const sentiment = document.getElementById('crowd-sentiment-slider');
+    const sentimentVal = document.getElementById('sentiment-val');
+    const banterText = document.getElementById('dj-banter-text');
+
+    if (fader) {
+      fader.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        const aVol = 100 - val;
+        const bVol = val;
+        if (deckAGain) deckAGain.textContent = `${aVol}% Vol`;
+        if (deckBGain) deckBGain.textContent = `${bVol}% Vol`;
+        if (faderPos) {
+          faderPos.textContent = val < 40 ? `DECK A (${aVol}%)` : val > 60 ? `DECK B (${bVol}%)` : `BLEND (${aVol}% / ${bVol}%)`;
+        }
+        if (deckA) deckA.classList.toggle('active', aVol >= 30);
+        if (deckB) deckB.classList.toggle('active', bVol >= 30);
+        playTone(260 + val * 4, 'sine', 0.03, 0.02);
+      });
+    }
+
+    if (sentiment) {
+      sentiment.addEventListener('input', (e) => {
+        const score = parseInt(e.target.value, 10);
+        const label = score > 70 ? 'HYPE (+POSITIVE)' : score > 35 ? 'CHILL (STEADY)' : 'MELLOW (LOW ENERGY)';
+        const color = score > 70 ? '#00ff9d' : score > 35 ? 'var(--blue)' : '#ffb700';
+        if (sentimentVal) {
+          sentimentVal.textContent = `${label} [${score}%]`;
+          sentimentVal.style.color = color;
+        }
+        if (banterText) {
+          if (score > 70) {
+            banterText.textContent = `"Room energy is electric at ${score}%! Dropping higher BPM harmonic tracks on Deck B. Soundclash battle queue is surging!"`;
+          } else if (score > 35) {
+            banterText.textContent = `"Smooth vibes in the lounge at ${score}% sentiment. Transitioning through Camelot Wheel circle of fifths for a seamless chill progression."`;
+          } else {
+            banterText.textContent = `"Mellow mood detected (${score}%). Shifting audio engine to deep atmospheric downtempo cues. Upvote your favorites to shift the soundscape!"`;
+          }
+        }
+        playTone(320 + score * 3, 'triangle', 0.04, 0.02);
+      });
+    }
   }
 }
 
@@ -1347,6 +1463,10 @@ function getRakabotResponse(query) {
 
   if (q.includes('kifayati') || q.includes('scrape') || q.includes('price') || q.includes('arbitrage')) {
     return '<strong>Kifayati</strong> is a high-throughput smart data aggregation platform that crawls, fuzzy-matches, and normalizes catalog feeds across multi-vendor stores to surface real-time price arbitrage with Redis in-memory caching (<15ms lookups).';
+  }
+
+  if (q.includes('spotify') || q.includes('dj') || q.includes('lounge') || q.includes('camelot') || q.includes('soundclash')) {
+    return '<strong>Spotify AI DJ Studio</strong> is a collaborative live audio lounge and sentiment-aware DJ engine Karan built using <strong>React, Node.js, Express, Socket.IO, MongoDB, and Web Audio API</strong>. It implements authoritative multi-room live queue sync, Camelot wheel harmonic key matching, chat sentiment analysis, Soundclash battles, and automated LLM segue banter. Live app: <a href="https://ai-dj-studio-ten.vercel.app" target="_blank" class="text-blue" style="text-decoration:underline;font-weight:700;">ai-dj-studio-ten.vercel.app ↗</a>.';
   }
 
   if (q.includes('stack') || q.includes('backend') || q.includes('frontend') || q.includes('tech') || q.includes('skills')) {
@@ -1775,9 +1895,10 @@ const CMD_ACTIONS = [
   { id: 'proj-4', group: 'Projects', icon: '📂', title: 'Kifayati', sub: 'Smart Web Data Systems', action: () => openProject(projects[3]) },
   { id: 'proj-5', group: 'Projects', icon: '📂', title: 'Multiple Disease Prediction', sub: 'Machine Learning Classification', action: () => openProject(projects[4]) },
   { id: 'proj-6', group: 'Projects', icon: '📂', title: 'Como', sub: 'Cocktail Discovery & Bar Inventory Matching', action: () => openProject(projects[5]) },
+  { id: 'proj-7', group: 'Projects', icon: '🎧', title: 'Spotify AI DJ Studio', sub: 'Collaborative Live Audio & Sentiment Engine', action: () => openProject(projects[6]) },
 
   // Filter shortcuts
-  { id: 'filter-all', group: 'Filter Work', icon: '🏷️', title: 'Filter: All Projects', sub: 'View all 6 engineered products', action: () => { navigateTo('scene-05'); setProjectFilter('all'); } },
+  { id: 'filter-all', group: 'Filter Work', icon: '🏷️', title: 'Filter: All Projects', sub: 'View all 7 engineered products', action: () => { navigateTo('scene-05'); setProjectFilter('all'); } },
   { id: 'filter-ai', group: 'Filter Work', icon: '🏷️', title: 'Filter: AI / Machine Learning', sub: 'YOLOv8, Gemini, ML models', action: () => { navigateTo('scene-05'); setProjectFilter('ai'); } },
   { id: 'filter-fullstack', group: 'Filter Work', icon: '🏷️', title: 'Filter: Full-Stack SaaS', sub: 'React, Next.js, TypeScript, NestJS', action: () => { navigateTo('scene-05'); setProjectFilter('fullstack'); } },
   { id: 'filter-systems', group: 'Filter Work', icon: '🏷️', title: 'Filter: Systems & Architecture', sub: 'Data flows, APIs, infra', action: () => { navigateTo('scene-05'); setProjectFilter('systems'); } },

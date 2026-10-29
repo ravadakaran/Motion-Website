@@ -50,7 +50,7 @@ Track progress for new features, performance optimizations, and deployment prepa
 - [x] **Interactive Project Modal Upgrades**:
   - [x] Tabbed deep-dive in [`#project-modal`](file:///d:/New%20Portfolio/index.html):
     - `Overview` (Cover media, description, live links)
-    - `Architecture` (System topology & data flow for all 6 projects)
+    - `Architecture` (System topology & data flow for all 7 projects)
     - `Challenges & Metrics` (Latency benchmarks, uptime SLAs, and solutions)
     - `Interactive Sandbox` (Project-specific live interactive simulation)
   - [x] Mini interactive widgets:
@@ -60,6 +60,7 @@ Track progress for new features, performance optimizations, and deployment prepa
     - Inverted-index home bar cocktail recipe matcher
     - Gemini multimodal branching predictor
     - Real-time parallel multi-store price arbitrage scanner
+    - Harmonic BPM & Camelot Wheel DJ crossfader with live chat sentiment adaptation (Spotify AI DJ Studio)
 - [x] **RAKA-BOT / Cyber System Assistant**:
   - [x] Floating cyberpunk AI FAB trigger and dialog terminal
   - [x] Quick prompt chips (YOLOv8, Flowsuite, Backend stack, Availability, Resume & Contact)

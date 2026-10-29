@@ -1615,6 +1615,76 @@ dialog::backdrop {
   color: var(--blue);
 }
 
+/* SPOTIFY AI DJ SANDBOX STYLES */
+.dj-decks-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.dj-deck {
+  padding: 0.85rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  text-align: left;
+  transition: all 180ms ease;
+}
+
+.dj-deck.active {
+  border-color: var(--blue);
+  background: rgba(0, 243, 255, 0.05);
+  box-shadow: 0 0 12px var(--blue-subtle);
+}
+
+.deck-tag {
+  font: 700 0.68rem var(--font-mono);
+  color: var(--blue);
+  letter-spacing: 1px;
+}
+
+.deck-track-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0.3rem 0;
+}
+
+.deck-meta {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  font: 0.72rem var(--font-mono);
+}
+
+.camelot-pill {
+  padding: 0.15rem 0.45rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  color: var(--white);
+}
+
+.camelot-pill.match {
+  background: rgba(0, 255, 157, 0.15);
+  color: #00ff9d;
+  border: 1px solid rgba(0, 255, 157, 0.4);
+}
+
+.bpm-pill {
+  padding: 0.15rem 0.45rem;
+  background: rgba(0, 243, 255, 0.1);
+  color: var(--blue);
+  border-radius: 2px;
+}
+
+.dj-banter-card {
+  padding: 0.85rem 1rem;
+  background: rgba(0, 243, 255, 0.03);
+  border: 1px solid rgba(0, 243, 255, 0.2);
+  border-left: 3px solid var(--blue);
+  border-radius: 2px;
+  text-align: left;
+}
+
 /* CONTACT TRIGGER & FORM STYLES */
 .contact-cta-wrapper {
   margin-top: 1.5rem;
@@ -2230,7 +2300,7 @@ dialog::backdrop {
 
 .gh-pinned-repos {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 0.85rem;
 }
 
