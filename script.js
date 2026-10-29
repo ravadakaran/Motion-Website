@@ -1350,19 +1350,35 @@ function getRakabotResponse(query) {
   }
 
   if (q.includes('stack') || q.includes('backend') || q.includes('frontend') || q.includes('tech') || q.includes('skills')) {
-    return '<strong>Karan\'s Core Technology Stack:</strong><br>• <em>Frontend:</em> React 19, Next.js, TypeScript, Vite, Tailwind CSS, Canvas WebGL<br>• <em>Backend & APIs:</em> NestJS, Node.js, Express, Python FastAPI, Spring Boot<br>• <em>Databases:</em> PostgreSQL, MySQL, MongoDB, Prisma ORM, Redis<br>• <em>AI & ML:</em> YOLOv8, Computer Vision, Gemini Multimodal API, Scikit-Learn<br>• <em>Infra & Cloud:</em> Docker, Git, GitHub Actions, Vercel, Render, Neon';
+    return '<strong>Karan\'s Core Technology Stack:</strong><br>• <em>Languages:</em> Python, Java, JavaScript, PHP, SQL, HTML5, CSS3<br>• <em>Frameworks & Libraries:</em> FastAPI, Flask, Streamlit, OpenCV, YOLOv8, Scikit-Learn, Pandas, NumPy, React, Next.js<br>• <em>Databases & Dev Tools:</em> MySQL, PostgreSQL, SQLite, Git, GitHub, RESTful APIs, Postman, Prisma ORM<br>• <em>Core Competencies:</em> Machine Learning Pipelines, Computer Vision, Full-Stack Web Development, OOP';
+  }
+
+  if (q.includes('education') || q.includes('college') || q.includes('university') || q.includes('degree') || q.includes('srm') || q.includes('btech')) {
+    return 'Karan is pursuing his <strong>Bachelor of Technology in Computer Science and Engineering (2022 – 2026)</strong> at <strong>SRM Institute of Science and Technology, Chennai, India</strong>.';
+  }
+
+  if (q.includes('publication') || q.includes('research') || q.includes('paper') || q.includes('ssrn') || q.includes('journal')) {
+    return 'Karan published research titled <strong>"Real-Time Intelligent Traffic Signal Control Using YOLOv8 with Ambulance Priority"</strong> in the <strong>SSRN Electronic Journal</strong>. It proposes an AI-driven adaptive traffic signal framework integrating computer vision (YOLOv8) and dynamic queuing theory for prioritized emergency vehicle clearance.';
+  }
+
+  if (q.includes('cert') || q.includes('achievement') || q.includes('award') || q.includes('hackathon') || q.includes('oracle') || q.includes('aws') || q.includes('anthropic')) {
+    return '<strong>Certifications & Achievements:</strong><br>• <strong>Anthropic Education:</strong> AI Fluency: Framework & Foundations (Sep 2026)<br>• <strong>AWS Academy:</strong> Machine Learning Foundations (Feb 2024)<br>• <strong>Oracle:</strong> Global Certification (Mar 2025)<br>• <strong>Hackathons:</strong> Finalist / Participant at SRM Hackathon 8.0 (2024) & Layer 0 Hackathon (2023).';
   }
 
   if (q.includes('hire') || q.includes('job') || q.includes('available') || q.includes('role') || q.includes('interview') || q.includes('work')) {
-    return '<strong>Yes! Karan is actively open</strong> to Full-Time roles, AI/ML Engineering opportunities, and high-impact Full-Stack architecture projects. You can transmit a direct message via the portfolio contact modal or reach out directly at <a href="mailto:ravadakaran733@gmail.com" class="text-blue" style="text-decoration:underline;">ravadakaran733@gmail.com</a>.';
+    return '<strong>Yes! Karan is actively open</strong> to Full-Time roles, AI/ML Engineering opportunities, and high-impact Full-Stack architecture projects. You can reach out via the contact modal, call <a href="tel:+918409009999" class="text-blue">+91 8409009999</a>, or email <a href="mailto:ravadakaran733@gmail.com" class="text-blue" style="text-decoration:underline;">ravadakaran733@gmail.com</a> (Raipur, India).';
   }
 
   if (q.includes('resume') || q.includes('cv') || q.includes('pdf')) {
-    return 'You can view or download Karan\'s official resume here: <a href="./resume/resume.pdf" target="_blank" class="text-blue" style="text-decoration:underline;font-weight:700;">Ravada_Karan_Resume.pdf (Direct Link) ↗</a>.';
+    return 'You can view or download Karan\'s official 1-page resume here: <a href="./resume/resume.pdf" target="_blank" class="text-blue" style="text-decoration:underline;font-weight:700;">Ravada_Karan_Resume.pdf (Direct Link) ↗</a>.';
   }
 
   if (q.includes('experience') || q.includes('intern') || q.includes('navodita')) {
-    return 'Karan worked as a <strong>Full-Stack Developer Intern at Navodita Infotech</strong>, where he engineered modern full-stack architectures, responsive frontend interfaces, robust database integrations, and scalable production deployment pipelines.';
+    return 'Karan worked as a <strong>Full-Stack Web Developer at Navodita Infotech (Dec 2025 – Jan 2026, Remote, India)</strong>. He engineered responsive full-stack applications, designed secure RESTful APIs with relational databases, optimized queries and rendering to slash latency, and participated in Agile sprint reviews & testing.';
+  }
+
+  if (q.includes('phone') || q.includes('mobile') || q.includes('call') || q.includes('location') || q.includes('raipur')) {
+    return 'Karan is based in <strong>Raipur, India</strong>. You can contact him at <strong>+91 8409009999</strong> or via email at <a href="mailto:ravadakaran733@gmail.com" class="text-blue">ravadakaran733@gmail.com</a>.';
   }
 
   if (q.includes('music') || q.includes('bgm') || q.includes('soundtrack') || q.includes('song') || q.includes('shiva') || q.includes('mandragora')) {
@@ -1376,10 +1392,10 @@ function getRakabotResponse(query) {
   }
 
   if (q.includes('hello') || q.includes('hi') || q.includes('hey') || q.includes('who')) {
-    return 'Greetings! I am <strong>RAKA-BOT</strong>, the AI system persona representing <strong>Ravada Karan (Raka)</strong>. Ask me about his projects (Flowsuite, YOLOv8 Traffic, Como, AI Film), technical stack, hiring status, or click any prompt chip above!';
+    return 'Greetings! I am <strong>RAKA-BOT</strong>, the AI system persona representing <strong>Ravada Karan (Raka)</strong>. Ask me about his projects (Flowsuite, YOLOv8 Traffic, Como, AI Film), research publication, education, technical stack, or download his resume!';
   }
 
-  return 'I am tuned to Karan\'s technical engineering knowledge base. You can ask about his <strong>YOLOv8 Computer Vision system</strong>, <strong>Flowsuite multi-tenancy</strong>, <strong>AI Film with Gemini</strong>, his <strong>Full-Stack technologies</strong>, or whether he is <strong>available for hire</strong>!';
+  return 'I am tuned to Karan\'s technical engineering knowledge base. You can ask about his <strong>YOLOv8 Computer Vision system</strong>, <strong>Flowsuite multi-tenancy</strong>, <strong>SSRN research publication</strong>, <strong>SRM B.Tech degree</strong>, his <strong>Full-Stack technologies</strong>, or view his <strong>official resume</strong>!';
 }
 
 function handleRakabotSubmit(e) {
@@ -1773,7 +1789,9 @@ const CMD_ACTIONS = [
   { id: 'theme-violet', group: 'Themes', icon: '🎨', title: 'Theme: Synthwave Violet', sub: 'Deep neon purple vibe', action: () => applyTheme('violet', true) },
 
   // System Commands
-  { id: 'cmd-resume', group: 'System Commands', icon: '📄', title: 'cat resume.pdf', sub: 'Open / Download Resume PDF', action: () => window.open('./resume/resume.pdf', '_blank') },
+  { id: 'cmd-resume', group: 'System Commands', icon: '📄', title: 'cat resume.pdf', sub: 'Open / Download Official 1-Page Resume PDF', action: () => window.open('./resume/resume.pdf', '_blank') },
+  { id: 'cmd-credentials', group: 'System Commands', icon: '🎓', title: 'view credentials & experience', sub: 'Navodita Infotech, SRM B.Tech, Certifications', action: () => navigateTo('scene-07') },
+  { id: 'cmd-publication', group: 'System Commands', icon: '📚', title: 'view research publication', sub: 'SSRN Electronic Journal - YOLOv8 Traffic Signal', action: () => navigateTo('scene-07') },
   { id: 'cmd-contact', group: 'System Commands', icon: '📡', title: 'transmit message', sub: 'Open Direct Transmission Modal', action: () => openContactModal(cmdPaletteBtn) },
   { id: 'cmd-simulate', group: 'System Commands', icon: '▶️', title: 'simulate pipeline', sub: 'Run Scene 03 end-to-end data pipeline', action: () => { navigateTo('scene-03'); setTimeout(runPipelineSimulation, 700); } },
   { id: 'cmd-sound', group: 'System Commands', icon: '🔊', title: 'toggle audio feedback', sub: 'Toggle Web Audio SFX on/off', action: () => audioToggleBtn && audioToggleBtn.click() },

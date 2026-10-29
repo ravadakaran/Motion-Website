@@ -5,9 +5,11 @@ Track progress for new features, performance optimizations, and deployment prepa
 ---
 
 ## 🚀 Immediate Next Actions
-- [x] **Resume PDF Integration**:
-  - [x] Update navbar `RESUME ↗` CTA and contact links to directly link to local [`resume/resume.pdf`](file:///d:/New%20Portfolio/resume/resume.pdf) with fallback download options
-  - [x] Add direct preview/download trigger in Scene 10 (Contact)
+- [x] **Resume PDF Integration & Addition**:
+  - [x] Generated official, vector-crisp 1-page resume PDF at [`resume/resume.pdf`](file:///d:/New%20Portfolio/resume/resume.pdf) and web-accessible template [`resume/resume.html`](file:///d:/New%20Portfolio/resume/resume.html)
+  - [x] Verified navbar `RESUME ↗` CTA and contact links directly download/open [`resume/resume.pdf`](file:///d:/New%20Portfolio/resume/resume.pdf)
+  - [x] Updated Scene 04 Tech Stack, Scene 07 Experience & Credentials (SRM B.Tech, SSRN publication, Certifications, Navodita Infotech), and Scene 10 Contact (Phone & Raipur, India)
+  - [x] Synchronized RAKA-BOT conversational AI knowledge and Command Palette with complete resume details
 - [x] **Real Contact Form Transmission**:
   - [x] Wire [`#contact-form`](file:///d:/New%20Portfolio/index.html) to serverless email service (Web3Forms) so messages deliver directly to `ravadakaran733@gmail.com`
   - [x] Add graceful offline/network failure handling and mailto fallback
